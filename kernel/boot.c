@@ -72,7 +72,7 @@ void term_setup(struct stivale2_struct* hdr) {
 // NEW STUFF // TODO ~~~~~~~
 uint64_t kstrlen(const char* str) {
   uint64_t len = 0;
-  const char* loc = str;  
+  char* loc = str;  
   while(loc != NULL) {
     len++; 
     loc++; 
@@ -92,8 +92,22 @@ void kprint_s(const char* str) {
   term_write(str, len);
 }
 
+uint64_t d_helper(uint64_t value) {
+  uint64_t holder = value / 10; 
+}
+
 void kprint_d(uint64_t value){
-  // TODO
+  //if we are out of numbers just stop
+  if (value / 10 == 0) {
+    return; 
+  } else {
+    // if not, mod this, recurse (down by a power of 10)
+    //   and do it again
+    char num = value % 10; 
+    kprint_d(value / 10);
+    kprint_c(num); 
+  }
+
 }
 
 void kprint_x(uint64_t value) {
