@@ -98,16 +98,40 @@ uint64_t d_helper(uint64_t value) {
 
 void kprint_d(uint64_t value){
   //if we are out of numbers just stop
-  if (value / 10 == 0) {
+  // if (value / 10 == 0) {
+  //   return; 
+  // } else {
+  //   // if not, mod this, recurse (down by a power of 10)
+  //   //   and do it again
+  //   char num = value % 10; 
+  //   kprint_d(value / 10);
+  //   kprint_c(num); 
+  // }
+
+  uint64_t digits[20];  //max number of digits for number 2^64
+  uint64_t place = 19; // keeps track of what index of array we're at (remember offset!)
+  
+  if(value == 0) {
+    // deal if 0 
     return; 
-  } else {
-    // if not, mod this, recurse (down by a power of 10)
-    //   and do it again
-    char num = value % 10; 
-    kprint_d(value / 10);
-    kprint_c(num); 
   }
 
+  // PROBLEM: OFF BY ONE ERROR somewhere, only impacts the "first digit"/last thing dealt with from the mod
+
+  // fill array
+  while(value / 10 != 0) {
+    digits[place] = value % 10; 
+    value = value / 10; 
+    if(value < 10) { // if we get down to the last digit, just print it
+      kprint_c(value + 48); 
+    }
+    place --; 
+  }
+
+  // print the array: 
+  for(place; place < 20; place++) {
+    kprint_c(digits[place] + 48); // 48 is value of 0 in ascii (aka offset is needed)
+  }
 }
 
 void kprint_x(uint64_t value) {
@@ -140,6 +164,12 @@ void _start(struct stivale2_struct* hdr) {
   kprint_c('Q');
   kprint_c('q'); 
   kprint_c('\n');
+
+  // test kprint_d
+  kprint_d(2);
+  //kprint_d(1000); 
+  kprint_d(1342); 
+   
 
   //test kprint_s
   kprint_s("hello");
