@@ -70,14 +70,14 @@ void term_setup(struct stivale2_struct* hdr) {
 }
 
 // NEW STUFF // TODO ~~~~~~~
+
+// credit: https://stackoverflow.com/questions/3213827/how-to-iterate-over-a-string-in-c 
 uint64_t kstrlen(const char* str) {
   uint64_t len = 0;
-  char* loc = str;  
-  while(loc != NULL) {
-    len++; 
-    loc++; 
+  while(*str) { //if we haven't finished iterating over the string, 
+    len++; // increase length and 
+    str++; // check next charactter
   }
-  
   return len; 
 }
 //
@@ -139,30 +139,37 @@ void _start(struct stivale2_struct* hdr) {
   //term_write("testing again\n");
 
   // test kprint_c
-  char test = 'h';  
-  kprint_c(test);
-  test = 'H'; 
-  kprint_c(test);
-  kprint_c(' ');
-  kprint_c('}');
-  kprint_c('Q');
-  kprint_c('q'); 
-  kprint_c('\n');
+  // char test = 'h';  
+  // kprint_c(test);
+  // test = 'H'; 
+  // kprint_c(test);
+  // kprint_c(' ');
+  // kprint_c('}');
+  // kprint_c('Q');
+  // kprint_c('q'); 
+  // kprint_c('\n');
 
   // test kprint_d
-  kprint_d(2);
-  kprint_c('\n'); 
-  kprint_d(0); 
-  kprint_c('\n'); 
-  kprint_d(1000); 
-  kprint_c('\n'); 
-  kprint_d(1342); 
-  kprint_c('\n'); 
-  kprint_d(5379); 
+  // kprint_d(2);
+  // kprint_c('\n'); 
+  // kprint_d(0); 
+  // kprint_c('\n'); 
+  // kprint_d(1000); 
+  // kprint_c('\n'); 
+  // kprint_d(1342); 
+  // kprint_c('\n'); 
+  // kprint_d(5379); 
    
 
   //test kprint_s
-  kprint_s("hello");
+  //kprint_s("hello");
+
+  // test strlen
+  kprint_d(kstrlen("hello")); // should be 5
+  kprint_c(' ');  
+  kprint_d(kstrlen("hi")); // should be 2
+  kprint_c(' '); 
+  kprint_d(kstrlen("hey this is joe")); // should be 15
   
 
 	// We're done, just hang...
