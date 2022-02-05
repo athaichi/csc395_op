@@ -111,19 +111,17 @@ void kprint_d(uint64_t value){
   uint64_t digits[20];  //max number of digits for number 2^64
   uint64_t place = 19; // keeps track of what index of array we're at (remember offset!)
   
-  if(value == 0) {
-    // deal if 0 
+  if(value < 10) {
+    kprint_c(value + 48);
     return; 
   }
-
-  // PROBLEM: OFF BY ONE ERROR somewhere, only impacts the "first digit"/last thing dealt with from the mod
-
   // fill array
   while(value / 10 != 0) {
     digits[place] = value % 10; 
     value = value / 10; 
     if(value < 10) { // if we get down to the last digit, just print it
       kprint_c(value + 48); 
+      place++; 
     }
     place --; 
   }
@@ -167,8 +165,14 @@ void _start(struct stivale2_struct* hdr) {
 
   // test kprint_d
   kprint_d(2);
-  //kprint_d(1000); 
+  kprint_c('\n'); 
+  kprint_d(0); 
+  kprint_c('\n'); 
+  kprint_d(1000); 
+  kprint_c('\n'); 
   kprint_d(1342); 
+  kprint_c('\n'); 
+  kprint_d(5379); 
    
 
   //test kprint_s
