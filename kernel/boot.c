@@ -97,31 +97,21 @@ uint64_t d_helper(uint64_t value) {
 }
 
 void kprint_d(uint64_t value){
-  //if we are out of numbers just stop
-  // if (value / 10 == 0) {
-  //   return; 
-  // } else {
-  //   // if not, mod this, recurse (down by a power of 10)
-  //   //   and do it again
-  //   char num = value % 10; 
-  //   kprint_d(value / 10);
-  //   kprint_c(num); 
-  // }
-
-  uint64_t digits[20];  //max number of digits for number 2^64
-  uint64_t place = 19; // keeps track of what index of array we're at (remember offset!)
-  
   if(value < 10) {
     kprint_c(value + 48);
     return; 
   }
+
+  uint64_t digits[20];  //max number of digits for number 2^64
+  uint64_t place = 19; // keeps track of what index of array we're at (remember offset!)
+  
   // fill array
   while(value / 10 != 0) {
     digits[place] = value % 10; 
     value = value / 10; 
     if(value < 10) { // if we get down to the last digit, just print it
       kprint_c(value + 48); 
-      place++; 
+      place++; // fix place to be the previously entered digit
     }
     place --; 
   }
