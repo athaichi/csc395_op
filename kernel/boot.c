@@ -92,10 +92,6 @@ void kprint_s(const char* str) {
   term_write(str, len);
 }
 
-uint64_t d_helper(uint64_t value) {
-  uint64_t holder = value / 10; 
-}
-
 void kprint_d(uint64_t value){
   if(value < 10) {
     kprint_c(value + 48);
