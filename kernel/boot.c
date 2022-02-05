@@ -87,7 +87,6 @@ void kprint_c(char c) {
 }
 
 void kprint_s(const char* str) {
-  // ideally: 
   uint64_t len = kstrlen(str);
   term_write(str, len);
 }
@@ -162,14 +161,16 @@ void _start(struct stivale2_struct* hdr) {
    
 
   //test kprint_s
-  //kprint_s("hello");
+  // kprint_s("hello\n");
+  // kprint_s("hi! nice to meet you????\n"); 
+  // kprint_s("4384>?<P{_)(*&^$#@!\t check tabs"); 
 
   // test strlen
-  kprint_d(kstrlen("hello")); // should be 5
-  kprint_c(' ');  
-  kprint_d(kstrlen("hi")); // should be 2
-  kprint_c(' '); 
-  kprint_d(kstrlen("hey this is joe")); // should be 15
+  // kprint_d(kstrlen("hello")); // should be 5
+  // kprint_c(' ');  
+  // kprint_d(kstrlen("hi")); // should be 2
+  // kprint_c(' '); 
+  // kprint_d(kstrlen("hey this is joe")); // should be 15
   
 
 	// We're done, just hang...
