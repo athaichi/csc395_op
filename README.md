@@ -18,3 +18,12 @@ This is an ongoing project. Be prepared for code and organization of said code t
 
 All functions are implemented from descriptions given in class. To see full assignment instructions see the [class website](https://curtsinger.cs.grinnell.edu/teaching/2022S/CSC395/).
 
+boot.c
+-------
+- `void kprint_c(char c)`: print a single character to the terminal
+- `void kprint_s(const char *)`: print a string to the terminal
+- `void kprint_d(uint64_t value)`: print a u64 bit integer to the terminal in decimal
+- `void kprint_x(uint64_t value)`: print a u64 bit integer to terminal in hex (lowercase)
+- `void kprint_p(void* ptr)`: print the value of a pointer to the terminal in hex with leading 0x. 
+- `void kprintf(const char* format, ...)`: print a formatted string to the terminal
+
