@@ -147,7 +147,10 @@ void kprint_x(uint64_t value) {
 }
 
 void kprint_p(void* ptr) {
-  // TODO
+  kprint_c('0'); 
+  kprint_c('x'); 
+  kprint_x(&ptr); 
+  return; 
 }
 
 // END NEW STUFF ~~~~~~~
@@ -206,6 +209,8 @@ void _start(struct stivale2_struct* hdr) {
   // kprint_c(' ');
   // kprint_x(4738295); // should be 484cf7
 
+  // test kprint_p
+  // kprint_p(stack); 
 
 	// We're done, just hang...
 	halt();
