@@ -154,6 +154,55 @@ void kprint_p(void* ptr) {
   return; 
 }
 
+// This is taken directly from the class website after completing the implementation 
+//   together as a class 
+void kprintf(const char* format, ...) {
+  // Start processing variadic arguments
+  va_list args;
+  va_start(args, format);
+
+  // Loop until we reach the end of the format string
+  size_t index = 0;
+  while (format[index] != '\0') {
+    // Is the current charater a '%'?
+    if (format[index] == '%') {
+      // Yes, print the argument
+      index++;
+      switch(format[index]) {
+        case '%':
+          kprint_c('%');
+          break;
+        case 'c':
+          kprint_c(va_arg(args, int));
+          break;
+        case 's':
+          kprint_s(va_arg(args, char*));
+          break;
+        case 'd':
+          kprint_d(va_arg(args, uint64_t));
+          break;
+        case 'x':
+          kprint_x(va_arg(args, int64_t));
+          break;
+        case 'p':
+          kprint_p(va_arg(args, void*));
+          break;
+        default:
+          kprint_s("<not supported>");
+      }
+    } else {
+      // No, just a normal character. Print it.
+      kprint_c(format[index]);
+    }
+    index++;
+  }
+
+  // Finish handling variadic arguments
+  va_end(args);
+}
+
+
+
 // END NEW STUFF ~~~~~~~
 
 void _start(struct stivale2_struct* hdr) {
