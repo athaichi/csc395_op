@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stddef.h>
+#include <stdarg.h>
 
 #include "stivale2.h"
 #include "util.h"
@@ -149,7 +150,7 @@ void kprint_x(uint64_t value) {
 void kprint_p(void* ptr) {
   kprint_c('0'); 
   kprint_c('x'); 
-  kprint_x(&ptr); 
+  kprint_x(*ptr); 
   return; 
 }
 
