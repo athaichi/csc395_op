@@ -118,7 +118,32 @@ void kprint_d(uint64_t value){
 }
 
 void kprint_x(uint64_t value) {
-  // TODO
+  if(value < 17) {
+    if(value < 10) { kprint_c(value + 48); }
+    else { kprint_c(value + 97 - 10); } // add 97 to get to 'a', -10 to find offset within a-f
+    return; 
+  }
+
+  uint64_t digits[16];  //max number of digits for number 2^64 represented in hex
+  uint64_t place = 15; // keeps track of what index of array we're at (remember offset!)
+  
+  // fill array
+  while(value / 16 != 0) {
+    digits[place] = value % 16; 
+    value = value / 16; 
+    if(value < 16) { // if we get down to the last digit, just print it
+      if(value < 10) { kprint_c(value + 48); }
+      else{ kprint_c(value + 97 - 10); } // add 97 to get to 'a', -10 to find offset within a-f
+      place++; // fix place to be the previously entered digit
+    }
+    place --; 
+  }
+
+  // print the array: 
+  for(place; place < 16; place++) {
+    if (digits[place] < 10) { kprint_c(digits[place] + 48); } // 48 is value of 0 in ascii (aka offset is needed)
+    else { kprint_c(digits[place] + 97 - 10); } // add 97 to get to 'a', -10 to find offset within a-f
+  }
 }
 
 void kprint_p(void* ptr) {
@@ -171,7 +196,16 @@ void _start(struct stivale2_struct* hdr) {
   // kprint_d(kstrlen("hi")); // should be 2
   // kprint_c(' '); 
   // kprint_d(kstrlen("hey this is joe")); // should be 15
-  
+
+  // test kprint_x
+  // kprint_x(0); // should be 0
+  // kprint_c(' '); 
+  // kprint_x(10); // should be a
+  // kprint_c(' ');
+  // kprint_x(48362); // should be bcea
+  // kprint_c(' ');
+  // kprint_x(4738295); // should be 484cf7
+
 
 	// We're done, just hang...
 	halt();
