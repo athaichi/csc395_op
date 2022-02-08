@@ -150,7 +150,7 @@ void kprint_x(uint64_t value) {
 void kprint_p(void* ptr) {
   kprint_c('0'); 
   kprint_c('x'); 
-  kprint_x(*ptr); 
+  kprint_x(ptr); 
   return; 
 }
 
@@ -201,6 +201,31 @@ void kprintf(const char* format, ...) {
   va_end(args);
 }
 
+void usable_memory(struct stivale2_struct* hdr) {
+  kprint_s("Usable memory: \n    "); 
+  struct stivale2_struct_tag_kernel_base_address* base_address = find_tag(hdr, STIVALE2_STRUCT_TAG_KERNEL_BASE_ADDRESS_ID); 
+  struct stivale2_struct_tag_memmap* memmap = find_tag(hdr, STIVALE2_STRUCT_TAG_MEMMAP_ID); 
+  struct stivale2_struct_tag_hhdm* hhdm = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID); 
+
+  for(uint64_t current = 0; current < memmap->entries; current++) {
+    struct stivale2_mmap_entry cur = memmap->memmap[current]; 
+    if(cur.type == 1) { // section of memory is usable
+
+      // print physical address 
+      kprint_p(cur.base); 
+      kprint_c('-'); 
+      kprint_p(cur.base + cur.length); 
+
+      kprint_s(" is mapped to "); 
+
+      kprint_p(cur.base - base_address->physical_base_address + hhdm->addr); 
+      kprint_c('-'); 
+      kprint_p(cur.base - base_address->physical_base_address + hhdm->addr + cur.length); 
+      kprint_c('\n');
+      kprint_s("    ");
+    }
+  }
+}
 
 
 // END NEW STUFF ~~~~~~~
@@ -260,7 +285,10 @@ void _start(struct stivale2_struct* hdr) {
   // kprint_x(4738295); // should be 484cf7
 
   // test kprint_p
-  // kprint_p(stack); 
+  //  kprint_p(stack); 
+
+  // test usable_memory
+  usable_memory(hdr); 
 
 	// We're done, just hang...
 	halt();
