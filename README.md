@@ -27,3 +27,6 @@ boot.c
 - `void kprint_p(void* ptr)`: print the value of a pointer to the terminal in hex with leading 0x. 
 - `void kprintf(const char* format, ...)`: print a formatted string to the terminal
 
+- `void usable_memory(struct stivale2_struct* hdr)`: prints all usable memory to the terminal
+    - First interval is the range of physical memory, second interval is the correspondingly mapped virtual memory
+
