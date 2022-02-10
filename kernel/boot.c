@@ -4,6 +4,7 @@
 
 #include "stivale2.h"
 #include "util.h"
+#include "interrupts.h"
 
 // Reserve space for the stack
 static uint8_t stack[8192];
@@ -284,6 +285,7 @@ idt_entry_t idt[256];
  * \param type  The type of interrupt handler being installed.
  *              Pass IDT_TYPE_INTERRUPT or IDT_TYPE_TRAP from above.
  */
+
 void idt_set_handler(uint8_t index, void* fn, uint8_t type) {
   // Fill in all fields of idt[index]
   // Make sure you fill in:
@@ -293,6 +295,10 @@ void idt_set_handler(uint8_t index, void* fn, uint8_t type) {
   //   dpl=0 (run the handler in kernel mode)
   //   ist=0 (we aren't using an interrupt stack table, so just pass 0)
   //   selector=IDT_CODE_SELECTOR
+  // =======
+  // handler
+
+  
 }
 
 // This struct is used to load an IDT once we've set it up
