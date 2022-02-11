@@ -51,6 +51,17 @@ idt_entry_t idt[256];
 // set interrput handler for interrupt 0
 void idt_set_handler(uint8_t index, void* fn, uint8_t type) {
     idt[index].offset_0 = 0; 
+    idt[index].selector = IDT_CODE_SELECTOR; 
+    idt[index].ist = 0; 
+    idt[index]._unused_0 = 0;
+    idt[index].offset_1 = 0; 
+    idt[index].type = type; 
+    idt[index]._unused_1 = 0; 
+    idt[index].dpl = 0; 
+    idt[index].present = 1; 
+    idt[index].offset_2 = 0; 
+    idt[index]._unused_1 = 0; 
+    idt[index]._unused_2 = 0; 
 
     // offset is the different parts of the handler function
     // turn function to a uint_64 pointer and then fuck around with it
