@@ -30,3 +30,8 @@ boot.c
 - `void usable_memory(struct stivale2_struct* hdr)`: prints all usable memory to the terminal
     - First interval is the range of physical memory, second interval is the correspondingly mapped virtual memory
 
+interrupts.c 
+----------
+- `void idt_setup()`: create an IDT table 
+- `void idt_set_handler(uint8_t index, void* fn, uint8_t type)`: helper for `itd_setup` which sets indvidual IDT entries
+
