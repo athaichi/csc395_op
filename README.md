@@ -20,6 +20,7 @@ All functions are implemented from descriptions given in class. To see full assi
 
 boot.c
 -------
+_Functions_
 - `void kprint_c(char c)`: print a single character to the terminal
 - `void kprint_s(const char *)`: print a string to the terminal
 - `void kprint_d(uint64_t value)`: print a u64 bit integer to the terminal in decimal
@@ -30,8 +31,15 @@ boot.c
 - `void usable_memory(struct stivale2_struct* hdr)`: prints all usable memory to the terminal
     - First interval is the range of physical memory, second interval is the correspondingly mapped virtual memory
 
-interrupts.c 
+interrupts.h
 ----------
+_Functions_
 - `void idt_setup()`: create an IDT table 
 - `void idt_set_handler(uint8_t index, void* fn, uint8_t type)`: helper for `itd_setup` which sets indvidual IDT entries
+
+_Variables_
+- `IDT_CODE_SELECTOR`
+- `IDT_TYPE_INTERRUPT`
+- `IDT_TYPE_TRAP` 
+
 
