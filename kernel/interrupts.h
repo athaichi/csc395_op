@@ -1,7 +1,7 @@
 #pragma once
 
-void idt_set_handler(uint8_t index, void* fn, uint8_t type)
-void idt_setup()
+void idt_set_handler(uint8_t index, void* fn, uint8_t type);
+void idt_setup();
 
 // Every interrupt handler must specify a code selector. We'll use entry 5 (5*8=0x28), which
 // is where our bootloader set up a usable code selector for 64-bit mode.
