@@ -46,43 +46,37 @@ idt_entry_t idt[256];
  * \param type  The type of interrupt handler being installed.
  *              Pass IDT_TYPE_INTERRUPT or IDT_TYPE_TRAP from above.
  */
-
-
-// set interrput handler for interrupt 0
 void idt_set_handler(uint8_t index, void* fn, uint8_t type) {
-    idt[index].offset_0 = 0; 
-    idt[index].selector = IDT_CODE_SELECTOR; 
-    idt[index].ist = 0; 
-    idt[index]._unused_0 = 0;
-    idt[index].offset_1 = 0; 
-    idt[index].type = type; 
-    idt[index]._unused_1 = 0; 
-    idt[index].dpl = 0; 
-    idt[index].present = 1; 
-    idt[index].offset_2 = 0; 
-    idt[index]._unused_1 = 0; 
-    idt[index]._unused_2 = 0; 
+   
+    // some helpful values for manipulating 
+    uint32_t zero32 = 0; 
+    uint8_t zero8 = 0; 
+    uint8_t one8 = 1; 
 
-    // offset is the different parts of the handler function
-    // turn function to a uint_64 pointer and then fuck around with it
+    // set fn to be a uintptr (uint64) so we can do bit shifting
+    uintptr_t function = (uintptr_t)fn; 
 
-    // things to remember: bit masking/shifting
-    // write one interrput set handler for each 
+    // offsets are the different parts of the handler function
+    // bytes     0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 -
+    //           x x x x x x x x x x x x x x x x  u64 in hex
+    // offset 0: x x x x 0 0 0 0 0 0 0 0 0 0 0 0  
+    // offset 1: 0 0 0 0 x x x x 0 0 0 0 0 0 0 0  
+    // offset 2: 0 0 0 0 0 0 0 0 x x x x x x x x  
+    uint16_t offset0 = (uint16_t)(function >> 48); // get bytes 0 1
+    uint16_t offset1 = (uint16_t)((function << 16) >> 48); // get bytes 2 3
+    uint32_t offset2 = (uint32_t)((function << 32) >> 32); // get bytes 4-7
 
-
-  // Fill in all fields of idt[index]
-  // Make sure you fill in:
-  //   handler (all three parts, which requires some bit masking/shifting)
-  //   type (using the parameter passed to this function)
-  //   p=1 (the entry is present)
-  //   dpl=0 (run the handler in kernel mode)
-  //   ist=0 (we aren't using an interrupt stack table, so just pass 0)
-  //   selector=IDT_CODE_SELECTOR
-  // =======
-  // handler
-
-  
-  
+    idt[index].offset_0 = offset0; 
+    idt[index].selector = IDT_CODE_SELECTOR;  
+    idt[index].ist = zero8;    // we aren't using an interrupt stack table, so just pass 0
+    idt[index]._unused_0 = zero8;
+    idt[index].type = type;    // using the parameter passed to this function
+    idt[index]._unused_1 = zero8; 
+    idt[index].dpl = zero8;    // run the handler in kernel mode
+    idt[index].present = one8; // the entry is present 
+    idt[index].offset_1 = offset1; 
+    idt[index].offset_2 = offset2;  
+    idt[index]._unused_2 = zero32; 
 }
 
 // This struct is used to load an IDT once we've set it up
