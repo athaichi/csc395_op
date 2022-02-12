@@ -29,12 +29,6 @@ typedef struct interrupt_context {
   uint64_t ss;
 } __attribute__((packed)) interrupt_context_t;
 
-__attribute__((interrupt))
-void handler0(interrupt_context_t* ctx) {
-  kprintf("Divide Error\n");
-  halt();
-}
-
 // Make an IDT
 idt_entry_t idt[256];
 
@@ -85,6 +79,135 @@ typedef struct idt_record {
   void* base;
 } __attribute__((packed)) idt_record_t;
 
+// Create the handler functions
+__attribute__((interrupt))
+void handler0(interrupt_context_t* ctx) {
+  kprintf("Debug Exception\n");
+  halt();
+}
+
+__attribute__((interrupt))
+void handler1(interrupt_context_t* ctx) {
+  kprintf("NMI Interrupt\n");
+  halt();
+}
+
+__attribute__((interrupt))
+void handler2(interrupt_context_t* ctx) {
+  kprintf("Breakpoint\n");
+  halt();
+}
+
+__attribute__((interrupt))
+void handler3(interrupt_context_t* ctx) {
+  kprintf("Overflow\n");
+  halt();
+}
+
+__attribute__((interrupt))
+void handler4(interrupt_context_t* ctx) {
+  kprintf("BOUND Range Exceeded\n");
+  halt();
+}
+
+__attribute__((interrupt))
+void handler5(interrupt_context_t* ctx) {
+  kprintf("Invalid Opcode (Undefined Opcode)\n");
+  halt();
+}
+
+__attribute__((interrupt))
+void handler6(interrupt_context_t* ctx) {
+  kprintf("Device Not Available (No Math Coprocessor)\n");
+  halt();
+}
+
+__attribute__((interrupt))
+void handler7(interrupt_context_t* ctx, uint64_t ec) {
+  kprintf("Double Fault (error code = %d)\n", ec);
+  halt();
+}
+
+__attribute__((interrupt))
+void handler8(interrupt_context_t* ctx) {
+  kprintf("Coprocessor Segment Overrun (reserved)\n");
+  halt();
+}
+
+__attribute__((interrupt))
+void handler9(interrupt_context_t* ctx, uint64_t ec) {
+  kprintf("Invalid TSS (error code = %d)\n", ec);
+  halt();
+}
+
+__attribute__((interrupt))
+void handler10(interrupt_context_t* ctx, uint64_t ec) {
+  kprintf("Segment Not Present (error code = %d)\n", ec);
+  halt();
+}
+
+__attribute__((interrupt))
+void handler11(interrupt_context_t* ctx, uint64_t ec) {
+  kprintf("Stack-Segment Fault (error code = %d)\n", ec);
+  halt();
+}
+
+__attribute__((interrupt))
+void handler12(interrupt_context_t* ctx, uint64_t ec) {
+  kprintf("General Protection (error code = %d)\n", ec);
+  halt();
+}
+
+__attribute__((interrupt))
+void handler13(interrupt_context_t* ctx, uint64_t ec) {
+  kprintf("Page Fault (error code = %d)\n", ec);
+  halt();
+}
+
+__attribute__((interrupt))
+void handler14(interrupt_context_t* ctx) {
+  kprintf("(Intel reserved. Do not use)\n");
+  halt();
+}
+
+__attribute__((interrupt))
+void handler15(interrupt_context_t* ctx) {
+  kprintf("x87 FPU Floating Point Error (Math Fault)\n");
+  halt();
+}
+
+__attribute__((interrupt))
+void handler16(interrupt_context_t* ctx, uint64_t ec) {
+  kprintf("Alignment Check (error code = %d)\n", ec);
+  halt();
+}
+
+__attribute__((interrupt))
+void handler17(interrupt_context_t* ctx) {
+  kprintf("Machine Check\n");
+  halt();
+}
+
+__attribute__((interrupt))
+void handler18(interrupt_context_t* ctx) {
+  kprintf("SIMD Floating Point Exception\n");
+  halt();
+}
+
+__attribute__((interrupt))
+void handler19(interrupt_context_t* ctx) {
+  kprintf("Virtualization Exception\n");
+  halt();
+}
+
+__attribute__((interrupt))
+void handler20(interrupt_context_t* ctx, uint64_t ec) {
+  kprintf("Control Protection Exception (error code = %d)\n", ec);
+  halt();
+}
+
+
+
 /**
  * Initialize an interrupt descriptor table, set handlers for standard exceptions, and install
  * the IDT.
@@ -104,26 +227,26 @@ void idt_setup() {
   // for now everything is just using a dummy handler function
   // for now, interrupts use TYPE_INTERRUPT, and everything else is a TYPE_TRAP
   idt_set_handler(indices[0], handler0, IDT_TYPE_TRAP);       // fault/trap
-  idt_set_handler(indices[1], handler0, IDT_TYPE_INTERRUPT);  // interrupt
-  idt_set_handler(indices[2], handler0, IDT_TYPE_TRAP);       // trap
-  idt_set_handler(indices[3], handler0, IDT_TYPE_TRAP);       // trap
-  idt_set_handler(indices[4], handler0, IDT_TYPE_TRAP);       // fault
-  idt_set_handler(indices[5], handler0, IDT_TYPE_TRAP);       // fault
-  idt_set_handler(indices[6], handler0, IDT_TYPE_TRAP);       // fault
-  idt_set_handler(indices[7], handler0, IDT_TYPE_TRAP);       // abort
-  idt_set_handler(indices[8], handler0, IDT_TYPE_TRAP);       // fault
-  idt_set_handler(indices[9], handler0, IDT_TYPE_TRAP);       // fault
-  idt_set_handler(indices[10], handler0, IDT_TYPE_TRAP);      // fault
-  idt_set_handler(indices[11], handler0, IDT_TYPE_TRAP);      // fault
-  idt_set_handler(indices[12], handler0, IDT_TYPE_TRAP);      // fault
-  idt_set_handler(indices[13], handler0, IDT_TYPE_TRAP);      // fault 
-  idt_set_handler(indices[14], handler0, IDT_TYPE_TRAP);      // fault 
-  idt_set_handler(indices[15], handler0, IDT_TYPE_TRAP);      // fault 
-  idt_set_handler(indices[16], handler0, IDT_TYPE_TRAP);      // fault 
-  idt_set_handler(indices[17], handler0, IDT_TYPE_TRAP);      // abort 
-  idt_set_handler(indices[18], handler0, IDT_TYPE_TRAP);      // fault 
-  idt_set_handler(indices[19], handler0, IDT_TYPE_TRAP);      // fault 
-  idt_set_handler(indices[20], handler0, IDT_TYPE_TRAP);      // fault 
+  idt_set_handler(indices[1], handler1, IDT_TYPE_INTERRUPT);  // interrupt
+  idt_set_handler(indices[2], handler2, IDT_TYPE_TRAP);       // trap
+  idt_set_handler(indices[3], handler3, IDT_TYPE_TRAP);       // trap
+  idt_set_handler(indices[4], handler4, IDT_TYPE_TRAP);       // fault
+  idt_set_handler(indices[5], handler5, IDT_TYPE_TRAP);       // fault
+  idt_set_handler(indices[6], handler6, IDT_TYPE_TRAP);       // fault
+  idt_set_handler(indices[7], handler7, IDT_TYPE_TRAP);       // abort
+  idt_set_handler(indices[8], handler8, IDT_TYPE_TRAP);       // fault
+  idt_set_handler(indices[9], handler9, IDT_TYPE_TRAP);       // fault
+  idt_set_handler(indices[10], handler10, IDT_TYPE_TRAP);      // fault
+  idt_set_handler(indices[11], handler11, IDT_TYPE_TRAP);      // fault
+  idt_set_handler(indices[12], handler12, IDT_TYPE_TRAP);      // fault
+  idt_set_handler(indices[13], handler13, IDT_TYPE_TRAP);      // fault 
+  idt_set_handler(indices[14], handler14, IDT_TYPE_TRAP);      // fault 
+  idt_set_handler(indices[15], handler15, IDT_TYPE_TRAP);      // fault 
+  idt_set_handler(indices[16], handler16, IDT_TYPE_TRAP);      // fault 
+  idt_set_handler(indices[17], handler17, IDT_TYPE_TRAP);      // abort 
+  idt_set_handler(indices[18], handler18, IDT_TYPE_TRAP);      // fault 
+  idt_set_handler(indices[19], handler19, IDT_TYPE_TRAP);      // fault 
+  idt_set_handler(indices[20], handler20, IDT_TYPE_TRAP);      // fault 
   
   // -------------------------------------------------
   
