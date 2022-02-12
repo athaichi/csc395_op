@@ -82,7 +82,6 @@ uint64_t kstrlen(const char* str) {
   }
   return len; 
 }
-//
 
 void kprint_c(char c) {
   term_write(&c, 1);
