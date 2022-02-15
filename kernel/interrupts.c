@@ -207,7 +207,6 @@ void handler20(interrupt_context_t* ctx, uint64_t ec) {
 }
 
 
-
 /**
  * Initialize an interrupt descriptor table, set handlers for standard exceptions, and install
  * the IDT.
