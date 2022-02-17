@@ -68,28 +68,34 @@ void translate(uintptr_t page_table, void* address) {
   // Find index of level 4 table
   uint32_t index4 = (addr << 17) >> 56; 
 
-  // Declare all variables: 
+  // Declare a bunch of useful variables: 
   uintptr_t level3page, level2page, level1page, physical_address = 0; 
   uint32_t index3, index2, index1, final_dest = 0; 
 
+  // check if table 3 is there
   pt_entry_t level4entry = start_page[index4]; 
-
   if (level4entry.present != 0) {
     level3page = print_abilites(level4entry, index4, 4); 
     
+    // get set up to look for table 2
     level3page >> 12; 
     index3 = (addr << 26) >> 56; 
     pt_entry_t level3entry = level3page[index3]; 
 
+    // check if table 2 is there
     if(level3entry.present != 0) {
       level2page = print_abilites(level3entry, index3, 3); 
     
+      // get set up to look for table 1
       level2page >> 12; 
       index2 = (addr << 35) >> 56; 
       pt_entry_t level2entry = level2page[index2];
+
+      // look for table 1
       if(level2entry.present != 0) {
         level1page = print_abilites(level2entry, index2, 2); 
     
+        // get set up to look for 
         level1page >> 12; 
         index1 = (addr << 47) >> 56; 
         pt_entry_t offset_entry = level1page[index1];
@@ -116,11 +122,6 @@ void translate(uintptr_t page_table, void* address) {
     kprintf("    Level 4 (index %d of %p) is not used\n", index4, level4entry); 
     return;
   }
-  
 
-  // Set up printed formatting 
-  //kprintf("    Level 4 (index %d of %x)\n", index, &page);
-  //kprintf("    Level 3 (index %d of %x)\n", index, &page);
-  //kprintf("    Level 2 (index %d of %x)\n", index, &page);
-  //kprintf("    Level 1 (index %d of %x)\n", index, &page); 
+  return; 
 }
