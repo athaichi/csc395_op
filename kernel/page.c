@@ -12,4 +12,18 @@ typedef struct page_table_entry {
   bool no_execute : 1;
 } __attribute__((packed)) pt_entry_t;
 
-// 52 - 12 = 40
+// get cr3 register
+uintptr_t read_cr3() {
+  uintptr_t value;
+  __asm__("mov %%cr3, %0" : "=r" (value));
+  return value;
+}
+
+/**
+ * Translate a virtual address to its mapped physical address
+ *
+ * \param address     The virtual address to translate
+ */
+void translate(uintptr_t page_table, void* address) {
+  //...
+}
