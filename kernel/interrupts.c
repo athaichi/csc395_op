@@ -206,6 +206,16 @@ void handler20(interrupt_context_t* ctx, uint64_t ec) {
   halt();
 }
 
+// credit: https://aticleworld.com/memset-in-c/ 
+void k_memset(void *arr, uint32_t c, size_t len) {
+    unsigned char *iterate_this = arr; 
+    for (uint32_t i = 0; i < len; i++) {
+        iterate_this[i] = c; 
+    }
+
+    return; 
+}
+
 
 /**
  * Initialize an interrupt descriptor table, set handlers for standard exceptions, and install
@@ -213,7 +223,7 @@ void handler20(interrupt_context_t* ctx, uint64_t ec) {
  */
 void idt_setup() {
   // Step 1: Zero out the IDT, probably using memset (which you'll have to implement)
-  // Write me!
+  k_memset(idt, 0, 256); 
 
   // -----------------------------------------------
 
