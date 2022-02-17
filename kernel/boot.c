@@ -247,7 +247,7 @@ void usable_memory(struct stivale2_struct* hdr) {
 void _start(struct stivale2_struct* hdr) {
   // We've booted! Let's start processing tags passed to use from the bootloader
   term_setup(hdr);
-  idt_setup(); 
+  //idt_setup(); 
 
   // Print a greeting
   term_write("Hello Kernel!\n", 14);
