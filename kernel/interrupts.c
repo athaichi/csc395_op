@@ -46,6 +46,7 @@ void idt_set_handler(uint8_t index, void* fn, uint8_t type) {
     uintptr_t function = (uintptr_t)fn; 
 
     // offsets are the different parts of the handler function
+    // THIS IS BACKWARDS 
     // bytes     0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 -
     //           x x x x x x x x x x x x x x x x  u64 in hex
     // offset 0: x x x x 0 0 0 0 0 0 0 0 0 0 0 0  
@@ -203,8 +204,8 @@ void handler20(interrupt_context_t* ctx, uint64_t ec) {
 
 // credit: https://aticleworld.com/memset-in-c/ 
 void k_memset(void *arr, uint32_t c, size_t len) {
-    uint32_t *iterate_this = arr; 
-    for (uint32_t i = 0; i < len; i++) {
+    uint8_t *iterate_this = arr; 
+    for (size_t  i = 0; i < len; i++) {
         iterate_this[i] = c; 
     }
 
