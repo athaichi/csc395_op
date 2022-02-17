@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdbool.h>
 
 // create a page entry
 // should be 64 bits
