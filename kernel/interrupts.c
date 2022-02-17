@@ -41,11 +41,6 @@ idt_entry_t idt[256];
  *              Pass IDT_TYPE_INTERRUPT or IDT_TYPE_TRAP from above.
  */
 void idt_set_handler(uint8_t index, void* fn, uint8_t type) {
-   
-    // some helpful values for manipulating 
-    uint32_t zero32 = 0; 
-    uint8_t zero8 = 0; 
-    uint8_t one8 = 1; 
 
     // set fn to be a uintptr (uint64) so we can do bit shifting
     uintptr_t function = (uintptr_t)fn; 
@@ -62,15 +57,15 @@ void idt_set_handler(uint8_t index, void* fn, uint8_t type) {
 
     idt[index].offset_0 = offset0; 
     idt[index].selector = IDT_CODE_SELECTOR;  
-    idt[index].ist = zero8;    // we aren't using an interrupt stack table, so just pass 0
-    idt[index]._unused_0 = zero8;
+    idt[index].ist = 0;        // aren't using an interrupt stack table, so just pass 0
+    idt[index]._unused_0 = 0; 
     idt[index].type = type;    // using the parameter passed to this function
-    idt[index]._unused_1 = zero8; 
-    idt[index].dpl = zero8;    // run the handler in kernel mode
-    idt[index].present = one8; // the entry is present 
+    idt[index]._unused_1 = 0;  
+    idt[index].dpl = 0;        // run the handler in kernel mode
+    idt[index].present = 1;    // the entry is present 
     idt[index].offset_1 = offset1; 
     idt[index].offset_2 = offset2;  
-    idt[index]._unused_2 = zero32; 
+    idt[index]._unused_2 = 0;  
 }
 
 // This struct is used to load an IDT once we've set it up
@@ -208,7 +203,7 @@ void handler20(interrupt_context_t* ctx, uint64_t ec) {
 
 // credit: https://aticleworld.com/memset-in-c/ 
 void k_memset(void *arr, uint32_t c, size_t len) {
-    unsigned char *iterate_this = arr; 
+    uint32_t *iterate_this = arr; 
     for (uint32_t i = 0; i < len; i++) {
         iterate_this[i] = c; 
     }
@@ -223,7 +218,7 @@ void k_memset(void *arr, uint32_t c, size_t len) {
  */
 void idt_setup() {
   // Step 1: Zero out the IDT, probably using memset (which you'll have to implement)
-  k_memset(idt, 0, 256); 
+  k_memset(idt, 0, sizeof(idt)); 
 
   // -----------------------------------------------
 

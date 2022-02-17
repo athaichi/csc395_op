@@ -236,6 +236,12 @@ void usable_memory(struct stivale2_struct* hdr) {
   }
 }
 
+// for testing interrupts
+// static struct stivale2_tag unmap_null_hdr_tag = {
+//   .identifier = STIVALE2_HEADER_TAG_UNMAP_NULL_ID,
+//   .next = 0
+// };
+
 // END NEW STUFF ~~~~~~~
 
 void _start(struct stivale2_struct* hdr) {
@@ -246,8 +252,6 @@ void _start(struct stivale2_struct* hdr) {
   // Print a greeting
   term_write("Hello Kernel!\n", 14);
   term_write("this is a test\n", 15);
-
-  //term_write("testing again\n");
 
   // test kprint_c
   // char test = 'h';  
@@ -297,7 +301,12 @@ void _start(struct stivale2_struct* hdr) {
   //  kprint_p(stack); 
 
   // test usable_memory
-  usable_memory(hdr); 
+  //usable_memory(hdr); 
+
+  // test idt
+  // int* p = (int*)0x1;
+  // *p = 123; 
+  __asm__("int $2");
 
 	// We're done, just hang...
 	halt();
