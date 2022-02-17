@@ -21,6 +21,30 @@ uintptr_t read_cr3() {
   return value;
 }
 
+uintptr_t print_abilites(pt_entry_t page, uint32_t index, int level) {
+  
+  kprintf("    Level %d (index %d of %p)\n", level, index, page);
+  kprintf("    "); 
+
+  if (page.kernel == 1) { // if it is usable
+    kprintf("usable "); 
+  }
+
+  if (page.writable == 1) { // if it is writable
+    kprintf("writable "); 
+  }
+
+  if (page.no_execute == 0) { // if it is executable
+    kprintf("executable "); 
+  }
+
+  // find next table
+  uintptr_t next_page = page.address; //+ hhhdm value?? 
+  kprintf("-> %p\n", &next_page); 
+
+  return next_page; 
+}
+
 /**
  * Translate a virtual address to its mapped physical address
  *
@@ -42,32 +66,40 @@ void translate(uintptr_t page_table, void* address) {
   // struct stivale2_struct_tag_hhdm* hhdm = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
   
   // Find index of level 4 table
-  uint32_t index4 = (addr << 18) >> 55; 
+  uint32_t index4 = (addr << 17) >> 56; 
 
   pt_entry_t level4entry = start_page[index4]; 
-  if (level4entry.present != 0) { // if the following table exists
-    kprintf("    Level 4 (index %d of %x)\n", level4entry, &start_page);
-    kprintf("    "); 
-
-    if (level4entry.kernel == 1) { // if it is usable
-      kprintf("usable "); 
+  if (level4entry.present != 0) {
+    uintptr_t level3page = print_abilites(level4entry, index4, 4); 
+    
+    level3page >> 12; 
+    uint32_t index3 = (addr << 26) >> 56; 
+    pt_entry_t level3entry = level3page[index3]; 
+    if(level3entry.present != 0) {
+      uintptr_t level2page = print_abilites(level3entry, index3, 3); 
+    
+      level2page >> 12; 
+      uint32_t index2 = (addr << 35) >> 56; 
+      pt_entry_t level2entry = level2page[index2];
+      if(level2entry.present != 0) {
+        uintptr_t level1page = print_abilites(level2entry, index2, 2); 
+    
+        level1page >> 12; 
+        uint32_t index1 = (addr << 47) >> 56; 
+        pt_entry_t offset_entry = level1page[index1];
+        if (offset_entry.present != 0) {
+          uint32_t final_dest = (addr << 53) >> 53;
+          uintptr_t physical_address = offset_entry[final_dest]; 
+          kprintf("%p maps to %p\n", address, physical_address); 
+        } else {
+          kprintf("    Level 1 (index %d of %p) is not used\n", final)
+        }
+      }
     }
-
-    if (level4entry.writable == 1) { // if it is writable
-      kprintf("writable "); 
-    }
-
-    if (level4entry.no_execute == 0) { // if it is executable
-      kprintf("executable "); 
-    }
-
-    // find next table
-    uintptr_t level3page = level4entry.address; //+ hhhdm value?? 
-    kprintf("-> %p\n", level3page); 
   }
+  
 
-  // Set up printed formatting
-  kprintf("Translating %p \n", address); 
+  // Set up printed formatting 
   //kprintf("    Level 4 (index %d of %x)\n", index, &page);
   //kprintf("    Level 3 (index %d of %x)\n", index, &page);
   //kprintf("    Level 2 (index %d of %x)\n", index, &page);
