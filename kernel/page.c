@@ -68,34 +68,53 @@ void translate(uintptr_t page_table, void* address) {
   // Find index of level 4 table
   uint32_t index4 = (addr << 17) >> 56; 
 
+  // Declare all variables: 
+  uintptr_t level3page, level2page, level1page, physical_address = 0; 
+  uint32_t index3, index2, index1, final_dest = 0; 
+
   pt_entry_t level4entry = start_page[index4]; 
+
   if (level4entry.present != 0) {
-    uintptr_t level3page = print_abilites(level4entry, index4, 4); 
+    level3page = print_abilites(level4entry, index4, 4); 
     
     level3page >> 12; 
-    uint32_t index3 = (addr << 26) >> 56; 
+    index3 = (addr << 26) >> 56; 
     pt_entry_t level3entry = level3page[index3]; 
+
     if(level3entry.present != 0) {
-      uintptr_t level2page = print_abilites(level3entry, index3, 3); 
+      level2page = print_abilites(level3entry, index3, 3); 
     
       level2page >> 12; 
-      uint32_t index2 = (addr << 35) >> 56; 
+      index2 = (addr << 35) >> 56; 
       pt_entry_t level2entry = level2page[index2];
       if(level2entry.present != 0) {
-        uintptr_t level1page = print_abilites(level2entry, index2, 2); 
+        level1page = print_abilites(level2entry, index2, 2); 
     
         level1page >> 12; 
-        uint32_t index1 = (addr << 47) >> 56; 
+        index1 = (addr << 47) >> 56; 
         pt_entry_t offset_entry = level1page[index1];
         if (offset_entry.present != 0) {
-          uint32_t final_dest = (addr << 53) >> 53;
-          uintptr_t physical_address = offset_entry[final_dest]; 
+          final_dest = (addr << 53) >> 53;
+          physical_address = offset_entry[final_dest]; 
           kprintf("%p maps to %p\n", address, physical_address); 
         } else {
-          kprintf("    Level 1 (index %d of %p) is not used\n", final)
+          kprintf("    Level 1 (index %d of %p) is not used\n", final_dest, offset_entry); 
+          return; 
         }
+
+      } else {
+        kprintf("    Level 2 (index %d of %p) is not used\n", index2, level2entry); 
+        return;
       }
+
+    } else {
+      kprintf("    Level 3 (index %d of %p) is not used\n", index3, level3entry); 
+      return;
     }
+
+  } else {
+    kprintf("    Level 4 (index %d of %p) is not used\n", index4, level4entry); 
+    return;
   }
   
 
