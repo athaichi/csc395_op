@@ -46,15 +46,14 @@ void idt_set_handler(uint8_t index, void* fn, uint8_t type) {
     uintptr_t function = (uintptr_t)fn; 
 
     // offsets are the different parts of the handler function
-    // THIS IS BACKWARDS 
     // bytes     0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 -
     //           x x x x x x x x x x x x x x x x  u64 in hex
     // offset 0: x x x x 0 0 0 0 0 0 0 0 0 0 0 0  
     // offset 1: 0 0 0 0 x x x x 0 0 0 0 0 0 0 0  
     // offset 2: 0 0 0 0 0 0 0 0 x x x x x x x x  
-    uint16_t offset0 = (uint16_t)(function >> 48); // get bytes 0 1
-    uint16_t offset1 = (uint16_t)((function << 16) >> 48); // get bytes 2 3
-    uint32_t offset2 = (uint32_t)((function << 32) >> 32); // get bytes 4-7
+    uint16_t offset0 = (function >> 55) & 0xFF; 
+    uint16_t offset1 = (function >> 31) & 0x00FF;
+    uint32_t offset2 = function & 0xFFFF;
 
     idt[index].offset_0 = offset0; 
     idt[index].selector = IDT_CODE_SELECTOR;  
