@@ -291,9 +291,19 @@ void idt_set_handler(uint8_t index, void* fn, uint8_t type) {
     // offset 0: x x x x 0 0 0 0 0 0 0 0 0 0 0 0  
     // offset 1: 0 0 0 0 x x x x 0 0 0 0 0 0 0 0  
     // offset 2: 0 0 0 0 0 0 0 0 x x x x x x x x  
-    uint16_t offset0 = (function >> 47) & 0xFF; 
-    uint16_t offset1 = (function >> 31) & 0x00FF;
+    uint16_t offset0 = (function >> 48) & 0xFF; 
+    uint16_t offset1 = (function >> 32) & 0x00FF;
     uint32_t offset2 = function & 0xFFFF;
+
+    // bytes     0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 -
+    //           x x x x x x x x x x x x x x x x  u64 in hex
+    // offset 0: 0 0 0 0 0 0 0 0 0 0 0 0 x x x x 
+    // offset 1: 0 0 0 0 0 0 0 0 x x x x 0 0 0 0  
+    // offset 2: x x x x x x x x 0 0 0 0 0 0 0 0  
+    
+    // uint16_t offset0 = function & 0xFF; 
+    // uint16_t offset1 = (function >> 16) & 0xFF;
+    // uint32_t offset2 = (function >> 32) & 0xFFFF;
 
     idt[index].offset_0 = offset0; 
     idt[index].selector = IDT_CODE_SELECTOR;  
@@ -569,9 +579,9 @@ void _start(struct stivale2_struct* hdr) {
   //usable_memory(hdr); 
 
   // test idt
-   int* p = (int*)0x1;
-   *p = 123; 
-  //__asm__("int $2");
+  //  int* p = (int*)0x1;
+  //  *p = 123; 
+  __asm__("int $2");
 
   kprintf("interrupt should be above this\n"); 
 
