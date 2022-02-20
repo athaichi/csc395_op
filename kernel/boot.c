@@ -307,9 +307,9 @@ void translate(void* address, struct stivale2_struct* hdr) {
     uint16_t index = indices[i]; 
     if (table[index].present) {
       kprintf("   level %d (index %d of %p)\n", i, index, table); 
-      kprintf("      %s", table[index].user ? "user" : "kernel"); 
-      kprintf(" %s", table[index].writable ? "writable" : ""); 
-      kprintf(" %s", table[index].no_execute ? "" : "executable"); 
+      kprintf("      %s", table[index].user ? "user " : "kernel "); 
+      kprintf("%s", table[index].writable ? "writable " : ""); 
+      kprintf("%s", table[index].no_execute ? "" : "executable"); 
 
       // Get physical address of the next level table
       table_phys = table[index].address << 12; 
@@ -322,6 +322,9 @@ void translate(void* address, struct stivale2_struct* hdr) {
       return; 
     }
   }
+
+  // get final offset 
+  //if ()
 
   // get final offset 
   uintptr_t result = table_phys + indices[0]; 
@@ -406,8 +409,10 @@ void _start(struct stivale2_struct* hdr) {
   //__asm__("int $2");
 
   // test paging
-  //translate(_start, hdr); 
-  translate(NULL, hdr); 
+  //translate(_start, hdr);
+  //translate(stack, hdr);  
+  //translate(usable_memory, hdr);
+  //translate(NULL, hdr); 
 
 	// We're done, just hang...
 	halt();
