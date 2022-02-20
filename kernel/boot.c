@@ -309,7 +309,7 @@ void _start(struct stivale2_struct* hdr) {
   //__asm__("int $2");
 
   // test paging
-  translate(read_cr3(), _start); 
+  translate(_start, hdr); 
 
 	// We're done, just hang...
 	halt();

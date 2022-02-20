@@ -33,16 +33,16 @@ void* get_hhdm(struct stivale2_struct* hdr) {
  *
  * \param address     The virtual address to translate
  */
-void translate(void* address) {
+void translate(void* address, struct stivale2_struct* hdr) {
 
   // find starting table address
   uintptr_t table_phys = read_cr3() & 0xFFFFFFFFFFFFF000;
 
   // get hhdm tag 
-  //uintptr_t hhdm_base = (uintptr_t)(get_hhdm(struct stivale2_struct* hdr)); 
+  uintptr_t hhdm_base = (uintptr_t)(get_hhdm(hdr)); 
 
   // find the first table 
-  //pt_entry_t * table = (pt_entry_t *)(table_phys + hhdm_base); 
+  pt_entry_t * table = (pt_entry_t *)(table_phys + hhdm_base); 
 
   // make parameter actually usable
   uint64_t linear_addr = (uint64_t)address; 
@@ -50,17 +50,18 @@ void translate(void* address) {
   // separate linear address into index pieces
   uint16_t indices[] = {
     linear_addr & 0xFFF,         // offset
-    (linear_addr >> 12) & 0xFF1, // level 1
-    (linear_addr >> 21) & 0xFF1, // level 2
-    (linear_addr >> 30) & 0xFF1, // level 3
-    (linear_addr >> 39) & 0xFF1, // level 4
+    (linear_addr >> 12) & 0x1FF, // level 1
+    (linear_addr >> 21) & 0x1FF, // level 2
+    (linear_addr >> 30) & 0x1FF, // level 3
+    (linear_addr >> 39) & 0x1FF, // level 4
   };
 
 
   kprintf("og address: %p", address);
-  for(int i = 4; i > 0; i--) {
+  for(int i = 4; i >= 0 ; i--) {
     kprintf("\n   level %d index is: %p", i, indices[i]); 
   }
+  kprint_c('\n'); 
   
   // // Begin terminal output
   // kprintf("Translating %p \n", address); 
@@ -84,11 +85,11 @@ void translate(void* address) {
   //   }
   // }
 
-  // // get final offset 
-  // uintptr_t result = table_phys + indices[0]; 
+  // get final offset 
+  uintptr_t result = table_phys + indices[0]; 
 
-  // // print final offset address 
-  // printf("%p maps to %p\n", address, result); 
+  // print final offset address 
+  kprintf("%p maps to %p\n", address, result); 
 
   return; 
 }
