@@ -79,6 +79,7 @@ void kprint_x(uint64_t value) {
 }
 
 void kprint_p(void* ptr) {
+  uint64_t ptr_useful = (uint64_t)ptr; 
   kprint_c('0'); 
   kprint_c('x'); 
   kprint_x(ptr); 
