@@ -1,4 +1,6 @@
 #include <stdint.h>
+#include <stddef.h>
+#include <stdarg.h>
 
 #include "memory.h"
 #include "stivale2.h"
@@ -21,16 +23,16 @@ void usable_memory(struct stivale2_struct* hdr) {
     if(cur.type == 1) { 
       // print physical address 
       kprint_s("    ");
-      kprint_p(cur.base); 
+      kprint_d(cur.base); 
       kprint_c('-'); 
-      kprint_p(cur.base + cur.length); 
+      kprint_d(cur.base + cur.length); 
 
       kprint_s(" is mapped to "); 
 
       // print virtual address
-      kprint_p(cur.base - base_address->physical_base_address + hhdm->addr); 
+      kprint_d(cur.base - base_address->physical_base_address + hhdm->addr); 
       kprint_c('-'); 
-      kprint_p(cur.base - base_address->physical_base_address + hhdm->addr + cur.length); 
+      kprint_d(cur.base - base_address->physical_base_address + hhdm->addr + cur.length); 
       
       // format for next entry 
       kprint_c('\n');
