@@ -40,26 +40,6 @@ static struct stivale2_header stivale_hdr = {
   .tags = (uintptr_t)&terminal_hdr_tag
 };
 
-// Find a tag with a given ID
-void* find_tag(struct stivale2_struct* hdr, uint64_t id) {
-  // Start at the first tag
-	struct stivale2_tag* current = (struct stivale2_tag*)hdr->tags;
-
-  // Loop as long as there are more tags to examine
-	while (current != NULL) {
-    // Does the current tag match?
-		if (current->identifier == id) {
-			return current;
-		}
-
-    // Move to the next tag
-		current = (struct stivale2_tag*)current->next;
-	}
-
-  // No matching tag found
-	return NULL;
-} 
-
 typedef void (*term_write_t)(const char*, size_t);
 term_write_t term_write = NULL;
 
@@ -138,7 +118,7 @@ void _start(struct stivale2_struct* hdr) {
   // kprint_x(4738295); // should be 484cf7
 
   // test kprint_p
-  //  kprint_p(stack); 
+    kprint_p(stack); 
 
   // test usable_memory
   //usable_memory(hdr); 
