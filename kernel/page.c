@@ -1,6 +1,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "kprint.h"
+
 // create a page entry
 // should be 64 bits
 typedef struct page_table_entry {
