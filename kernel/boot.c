@@ -9,11 +9,19 @@
 // Reserve space for the stack
 static uint8_t stack[8192];
 
+
+// for testing interrupts
+static struct stivale2_tag unmap_null_hdr_tag = {
+  .identifier = STIVALE2_HEADER_TAG_UNMAP_NULL_ID,
+  .next = 0
+};
+
+
 // Request a terminal from the bootloader
 static struct stivale2_header_tag_terminal terminal_hdr_tag = {
 	.tag = {
     .identifier = STIVALE2_HEADER_TAG_TERMINAL_ID,
-    .next = 0
+    .next = (uintptr_t)&unmap_null_hdr_tag
   },
   .flags = 0
 };
@@ -334,14 +342,6 @@ void translate(void* address, struct stivale2_struct* hdr) {
   return; 
 }
 
-
->>>>>>> 943c85fe0146ff9e5f3393833edcfc7069a36d19
-// for testing interrupts
-static struct stivale2_tag unmap_null_hdr_tag = {
-  .identifier = STIVALE2_HEADER_TAG_UNMAP_NULL_ID,
-  .next = (uintptr_t)&unmap_null_hdr_tag
-};
-
 // END NEW STUFF ~~~~~~~
 
 void _start(struct stivale2_struct* hdr) {
@@ -404,21 +404,16 @@ void _start(struct stivale2_struct* hdr) {
   //usable_memory(hdr); 
 
   // test idt
-<<<<<<< HEAD
   //  int* p = (int*)0x1;
   //  *p = 123; 
-  __asm__("int $2");
-=======
-  // int* p = (int*)0x1;
-  // *p = 123; 
   //__asm__("int $2");
+
 
   // test paging
   //translate(_start, hdr);
   //translate(stack, hdr);  
   //translate(usable_memory, hdr);
   //translate(NULL, hdr); 
->>>>>>> 943c85fe0146ff9e5f3393833edcfc7069a36d19
 
   kprintf("interrupt should be above this\n"); 
 
