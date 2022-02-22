@@ -342,6 +342,60 @@ void translate(void* address, struct stivale2_struct* hdr) {
   return; 
 }
 
+// ===============================================
+// ===============================================
+
+// do this via a linked list
+typedef struct pmem_freeentry {
+  uintptr_t physical_address; 
+  uintptr_t next;
+} __attribute__((packed)) pmem_freeentry_t;  
+
+// set up pointer to the front of the freelist
+pmem_freeentry_t * freelist = NULL; 
+
+/**
+ * Allocate a page of physical memory.
+ * \returns the physical address of the allocated physical memory or 0 on error.
+ */
+uintptr_t pmem_alloc() {
+
+  // if the freelist is empty, then darn
+  if (freelist == NULL) {
+    kprintf("No free space, sorry :(\n"); 
+    // halt(); 
+    return 0; 
+  }
+
+  // give the first page on the freelist
+  uintptr_t allocated = freelist->physical_address; 
+
+  // move freelist pointer to the next page in freelist
+  freelist = (pmem_freeentry_t*)freelist->next; 
+
+  // should return get translated to virtual addressing?
+
+
+  return allocated; 
+}
+
+/**
+ * Free a page of physical memory.
+ * \param p is the physical address of the page to free, which must be page-aligned.
+ */
+void pmem_free(uintptr_t p) { 
+
+  // create a new entry in the freelist
+  pmem_freeentry_t new; 
+  
+  // add the entry to the beginning of the freelist
+  new.physical_address = p; 
+  new.next = freelist->physical_address; 
+
+  // move freelist to new begining node
+  freelist = &new; 
+}
+
 // END NEW STUFF ~~~~~~~
 
 void _start(struct stivale2_struct* hdr) {
