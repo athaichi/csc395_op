@@ -10,11 +10,17 @@
 // Reserve space for the stack
 static uint8_t stack[8192];
 
+// for testing interrupts
+static struct stivale2_tag unmap_null_hdr_tag = {
+  .identifier = STIVALE2_HEADER_TAG_UNMAP_NULL_ID,
+  .next = 0
+};
+
 // Request a terminal from the bootloader
 static struct stivale2_header_tag_terminal terminal_hdr_tag = {
 	.tag = {
     .identifier = STIVALE2_HEADER_TAG_TERMINAL_ID,
-    .next = 0
+    .next = (uintptr_t)&unmap_null_hdr_tag
   },
   .flags = 0
 };
@@ -336,11 +342,7 @@ void translate(void* address, struct stivale2_struct* hdr) {
 }
 
 
-// for testing interrupts
-// static struct stivale2_tag unmap_null_hdr_tag = {
-//   .identifier = STIVALE2_HEADER_TAG_UNMAP_NULL_ID,
-//   .next = 0
-// };
+
 
 // END NEW STUFF ~~~~~~~
 
@@ -412,7 +414,7 @@ void _start(struct stivale2_struct* hdr) {
   //translate(_start, hdr);
   //translate(stack, hdr);  
   //translate(usable_memory, hdr);
-  //translate(NULL, hdr); 
+  translate(NULL, hdr); 
 
 	// We're done, just hang...
 	halt();
