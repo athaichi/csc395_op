@@ -270,6 +270,7 @@ uintptr_t read_cr3() {
 // create a helper to get physical to virtual 
 void* get_hhdm(struct stivale2_struct* hdr) {
   struct stivale2_struct_tag_hhdm* hhdm = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
+  return hhdm; 
 }
 
 /**
