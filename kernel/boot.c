@@ -372,10 +372,8 @@ uintptr_t pmem_alloc() {
   uintptr_t allocated = freelist->physical_address; 
 
   // move freelist pointer to the next page in freelist
+  // FIX THIS: any time you use next, it should be modded to be the virtual address
   freelist = (pmem_freeentry_t*)freelist->next; 
-
-  // should return get translated to virtual addressing?
-
 
   return allocated; 
 }
