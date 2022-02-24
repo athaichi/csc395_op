@@ -5,6 +5,7 @@
 #include "stivale2.h"
 #include "util.h"
 #include "interrupts.h"
+#include "pic.h"
 
 // Reserve space for the stack
 static uint8_t stack[8192];
