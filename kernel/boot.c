@@ -511,7 +511,7 @@ void idt_setup() {
   idt_set_handler(indices[19], handler19, IDT_TYPE_TRAP);      // fault 
   idt_set_handler(indices[20], handler20, IDT_TYPE_TRAP);      // fault 
 
-  idt_set_handler(IRQ1_INTERRUPT, keyboard_interrupt, IDT_TYPE_INTERRUPT); 
+  idt_set_handler(IRQ1_INTERRUPT, keyboard_interrupt, IDT_TYPE_TRAP); 
   
   // -------------------------------------------------
   
@@ -528,8 +528,6 @@ static struct stivale2_tag unmap_null_hdr_tag = {
   .identifier = STIVALE2_HEADER_TAG_UNMAP_NULL_ID,
   .next = (uintptr_t)&unmap_null_hdr_tag
 };
-
-
 
 // END NEW STUFF ~~~~~~~
 
