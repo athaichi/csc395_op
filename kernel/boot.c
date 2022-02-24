@@ -6,6 +6,7 @@
 #include "util.h"
 #include "interrupts.h"
 #include "pic.h"
+#include "port.h"
 
 // Reserve space for the stack
 static uint8_t stack[8192];
@@ -452,6 +453,14 @@ void handler20(interrupt_context_t* ctx, uint64_t ec) {
   halt();
 }
 
+// interrupt for key presses
+__attribute__((interrupt))
+void keyboard_interrupt(interrupt_context_t* ctx, uint64_t ec) {
+  uint8_t code = inb(0x60);
+  kprint_x(code); 
+  outb(PIC1_COMMAND, PIC_EOI); 
+}
+
 // credit: https://aticleworld.com/memset-in-c/ 
 void k_memset(void *arr, uint32_t c, size_t len) {
     uint8_t *current = arr; 
@@ -501,6 +510,8 @@ void idt_setup() {
   idt_set_handler(indices[18], handler18, IDT_TYPE_TRAP);      // fault 
   idt_set_handler(indices[19], handler19, IDT_TYPE_TRAP);      // fault 
   idt_set_handler(indices[20], handler20, IDT_TYPE_TRAP);      // fault 
+
+  idt_set_handler(IRQ1_INTERRUPT, keyboard_interrupt, IDT_TYPE_INTERRUPT); 
   
   // -------------------------------------------------
   
@@ -518,6 +529,8 @@ static struct stivale2_tag unmap_null_hdr_tag = {
   .next = (uintptr_t)&unmap_null_hdr_tag
 };
 
+
+
 // END NEW STUFF ~~~~~~~
 
 void _start(struct stivale2_struct* hdr) {
@@ -528,6 +541,10 @@ void _start(struct stivale2_struct* hdr) {
   // Print a greeting
   term_write("Hello Kernel!\n", 14);
   term_write("this is a test\n", 15);
+
+   // Keyboard stuff
+  pic_init(); 
+  pic_unmask_irq(1); 
 
   // test kprint_c
   // char test = 'h';  
@@ -582,9 +599,9 @@ void _start(struct stivale2_struct* hdr) {
   // test idt
   //  int* p = (int*)0x1;
   //  *p = 123; 
-  __asm__("int $3");
+  //__asm__("int $3");
 
-  kprintf("interrupt should be above this\n"); 
+  //kprintf("interrupt should be above this\n"); 
 
 	// We're done, just hang...
 	halt();
