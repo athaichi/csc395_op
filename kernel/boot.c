@@ -453,11 +453,61 @@ void handler20(interrupt_context_t* ctx, uint64_t ec) {
   halt();
 }
 
+// create an array of keys following scan code from 
+//   https://wiki.osdev.org/PS2_Keyboard#Scan_Code_Set_1
+//  keys not easily delt with recieve '!' as a placeholder
+uint8_t keys[] = {"!1234567890-=!!qwertyuiop[]!!asdfghjkl;'`!!zxcvbnm,./!*!!!"};
+  // esc bksp tab enter, lctrl, lshift, fwdslash rshift, lalt, sp, caploc, end at caps loc (0x3A)
+
+// take in a code and print corresponding key
+void key_print(uint8_t code) {
+
+  // Handle fancy characters
+  //========================
+  // esc
+  if (code == 0x01) { kprintf("escape"); return; }
+  
+  // backspace
+  if (code == 0x0E) { kprintf("backspace"); return; }
+
+  // tab
+  if (code == 0x0F) { kprint_c('\t'); return; }
+
+  // enter 
+  if (code == 0x1C) { kprint_c('\n'); return; }
+
+  // left control
+  if (code == 0x1D) { kprintf("control"); return; }
+
+  // left/right shift
+  if ((code == 0x2A) || (code == 0x36)) { kprintf("shifts"); return; }
+
+  // forward slash
+  if (code == 0x2B) { kprint_c('\\'); return; }
+
+  // left alt
+  if (code == 0x38) { kprintf("alt"); return; }
+
+  // space
+  if (code == 0x39) { kprint_c(' '); return; }
+
+  // caps loc
+  if (code == 0x3A) { kprintf("caps loc"); return; }
+  
+  //keyup codes
+  if (code >= 0x81) { return; }
+
+  // Handle everything else
+  // ======================
+  kprint_c(keys[code - 1]); 
+  return; 
+}
+
 // interrupt for key presses
 __attribute__((interrupt))
-void keyboard_interrupt(interrupt_context_t* ctx, uint64_t ec) {
+void keyboard_interrupt(interrupt_context_t* ctx) {
   uint8_t code = inb(0x60);
-  kprint_x(code); 
+  key_print(code);  
   outb(PIC1_COMMAND, PIC_EOI); 
 }
 
