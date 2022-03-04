@@ -502,19 +502,33 @@ char getkey(uint8_t code) {
   return keys[code - 1]; 
 }
 
-// interrupt for key presses
-__attribute__((interrupt))
-void keyboard_interrupt(interrupt_context_t* ctx) {
-  uint8_t code = inb(0x60);
-  key_print(code);  
-  outb(PIC1_COMMAND, PIC_EOI); 
-}
-
 // circular buffer and read/write pointers
 char buffer[100]; 
 int8_t buffer_length = 0; // number of characters currently in the buffer
 int8_t reading_index = 0; 
 int8_t writing_index = 0; 
+
+// interrupt for key presses
+__attribute__((interrupt))
+void keyboard_interrupt(interrupt_context_t* ctx) {
+  // get the keycode
+  uint8_t code = inb(0x60);
+
+  // make it the actual character
+  char key = getkey(code);  
+
+  // add it to the buffer
+  buffer[writing_index] = key; 
+  writing_index++; 
+  buffer_length++; 
+
+  // if we reach the end of the index, loop back too the beginning
+  if (writing_index >= 100) {
+    writing_index = 0; 
+  }
+
+  outb(PIC1_COMMAND, PIC_EOI); 
+}
 
 /**
  * Read one character from the keyboard buffer. If the keyboard buffer is empty this function will
