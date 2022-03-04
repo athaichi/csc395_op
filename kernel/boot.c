@@ -460,47 +460,46 @@ uint8_t keys[] = {"!1234567890-=!!qwertyuiop[]!!asdfghjkl;'`!!zxcvbnm,./!*!!!"};
   // esc bksp tab enter, lctrl, lshift, fwdslash rshift, lalt, sp, caploc, end at caps loc (0x3A)
 
 // take in a code and print corresponding key
-void key_print(uint8_t code) {
+char getkey(uint8_t code) {
 
   // Handle fancy characters
   //========================
   // esc
-  if (code == 0x01) { kprintf("escape"); return; }
+  if (code == 0x01) { return '\0'; }
   
   // backspace
-  if (code == 0x0E) { kprintf("backspace"); return; }
+  if (code == 0x0E) { return '\0'; }
 
   // tab
-  if (code == 0x0F) { kprint_c('\t'); return; }
+  if (code == 0x0F) { return '\t'; }
 
   // enter 
-  if (code == 0x1C) { kprint_c('\n'); return; }
+  if (code == 0x1C) { return '\n'; }
 
   // left control
-  if (code == 0x1D) { kprintf("control"); return; }
+  if (code == 0x1D) { return '\0'; }
 
   // left/right shift
-  if ((code == 0x2A) || (code == 0x36)) { kprintf("shifts"); return; }
+  if ((code == 0x2A) || (code == 0x36)) { return '\0'; }
 
   // forward slash
-  if (code == 0x2B) { kprint_c('\\'); return; }
+  if (code == 0x2B) { return '\\'; }
 
   // left alt
-  if (code == 0x38) { kprintf("alt"); return; }
+  if (code == 0x38) { return '\0'; }
 
   // space
-  if (code == 0x39) { kprint_c(' '); return; }
+  if (code == 0x39) { return ' '; }
 
   // caps loc
-  if (code == 0x3A) { kprintf("caps loc"); return; }
+  if (code == 0x3A) { return '\0'; }
   
   //keyup codes
-  if (code >= 0x81) { return; }
+  if (code >= 0x81) { return '\0'; }
 
   // Handle everything else
   // ======================
-  kprint_c(keys[code - 1]); 
-  return; 
+  return keys[code - 1]; 
 }
 
 // interrupt for key presses
