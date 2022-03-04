@@ -511,6 +511,40 @@ void keyboard_interrupt(interrupt_context_t* ctx) {
   outb(PIC1_COMMAND, PIC_EOI); 
 }
 
+// circular buffer and read/write pointers
+char buffer[100]; 
+int8_t buffer_length = 0; // number of characters currently in the buffer
+int8_t reading_index = 0; 
+int8_t writing_index = 0; 
+
+/**
+ * Read one character from the keyboard buffer. If the keyboard buffer is empty this function will
+ * block until a key is pressed.
+ *
+ * \returns the next character input from the keyboard
+ */
+char kgetc() {
+
+  // hang around until something enters the buffer
+  while (buffer_length == 0) {
+    ; 
+  }
+
+  // get the next character off the buffer
+  char returned = buffer[reading_index]; 
+
+  // move the pointer to the next character to read and decrease buffer length
+  reading_index++; 
+  buffer_length--; 
+
+  // check if we need to loop back around to the beginning of the array
+  if (reading_index >= 100) { 
+    reading_index = 0; 
+  }
+  
+  return returned; 
+}
+
 // credit: https://aticleworld.com/memset-in-c/ 
 void k_memset(void *arr, uint32_t c, size_t len) {
     uint8_t *current = arr; 
