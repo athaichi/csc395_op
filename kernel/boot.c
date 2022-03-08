@@ -353,6 +353,7 @@ typedef struct pmem_freeentry {
 } __attribute__((packed)) pmem_freeentry_t;  
 
 // set up pointer to the front of the freelist
+// this pointer is virtual memory
 pmem_freeentry_t * freelist = NULL; 
 
 /**
@@ -389,11 +390,13 @@ void pmem_free(uintptr_t p) {
   
   // add the entry to the beginning of the freelist
   new.physical_address = p; 
-  new.next = freelist->physical_address; 
+  new.next = freelist; 
 
   // move freelist to new begining node
   freelist = &new; 
 }
+
+
 
 // END NEW STUFF ~~~~~~~
 
