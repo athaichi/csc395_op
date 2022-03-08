@@ -407,6 +407,18 @@ void pmem_free(uintptr_t p, struct stivale2_struct* hdr) {
   freelist = &new; 
 }
 
+/**
+ * Map a single page of memory into a virtual address space.
+ * \param root The physical address of the top-level page table structure
+ * \param address The virtual address to map into the address space, must be page-aligned
+ * \param user Should the page be user-accessible?
+ * \param writable Should the page be writable?
+ * \param executable Should the page be executable?
+ * \returns true if the mapping succeeded, or false if there was an error
+ */
+bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable, bool executable) {
+  //do this at some point
+}
 
 // END NEW STUFF ~~~~~~~
 
