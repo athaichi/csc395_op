@@ -346,9 +346,12 @@ void translate(void* address, struct stivale2_struct* hdr) {
 // ===============================================
 // ===============================================
 
+// NOTE TO SELF: virtual address = physical address + hhdm address
+//               physical address = virtual address - hhdm address
+
 // do this via a linked list
 typedef struct pmem_freeentry {
-  uintptr_t physical_address; 
+  uintptr_t address; // physical address stored virtually
   uintptr_t next;
 } __attribute__((packed)) pmem_freeentry_t;  
 
@@ -360,7 +363,7 @@ pmem_freeentry_t * freelist = NULL;
  * Allocate a page of physical memory.
  * \returns the physical address of the allocated physical memory or 0 on error.
  */
-uintptr_t pmem_alloc() {
+uintptr_t pmem_alloc(struct stivale2_struct* hdr) {
 
   // if the freelist is empty, then darn
   if (freelist == NULL) {
@@ -369,11 +372,14 @@ uintptr_t pmem_alloc() {
     return 0; 
   }
 
+  // get hhdm tag 
+  uintptr_t hhdm_base = (uintptr_t)(get_hhdm(hdr));
+
   // give the first page on the freelist
-  uintptr_t allocated = freelist->physical_address; 
+  // change address to be actually physical instead of virtual
+  uintptr_t allocated = (freelist->address - hhdm_base); 
 
   // move freelist pointer to the next page in freelist
-  // FIX THIS: any time you use next, it should be modded to be the virtual address
   freelist = (pmem_freeentry_t*)freelist->next; 
 
   return allocated; 
@@ -383,19 +389,23 @@ uintptr_t pmem_alloc() {
  * Free a page of physical memory.
  * \param p is the physical address of the page to free, which must be page-aligned.
  */
-void pmem_free(uintptr_t p) { 
+void pmem_free(uintptr_t p, struct stivale2_struct* hdr) { 
 
   // create a new entry in the freelist
-  pmem_freeentry_t new; 
+  // this is virtual
+  pmem_freeentry_t * new; 
+
+  // get hhdm tag 
+  uintptr_t hhdm_base = (uintptr_t)(get_hhdm(hdr));
   
   // add the entry to the beginning of the freelist
-  new.physical_address = p; 
-  new.next = freelist; 
+  // convert physical address to be stored virtually 
+  new->address = (p + hhdm_base); 
+  new->next = freelist; 
 
   // move freelist to new begining node
   freelist = &new; 
 }
-
 
 
 // END NEW STUFF ~~~~~~~
