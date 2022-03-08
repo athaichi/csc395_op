@@ -698,6 +698,17 @@ void _start(struct stivale2_struct* hdr) {
 
   //kprintf("interrupt should be above this\n"); 
 
+  // test kgetc()
+  // for (int i = 0; i < 10; i++) {
+  //   char c = kgetc(); 
+  //   kprint_c(c); 
+  // }
+
+  // kprintf("Finished kgetc()!\n"); 
+
+  // test circular buffer: 
+  
+
 	// We're done, just hang...
 	halt();
 }
