@@ -407,16 +407,26 @@ void pmem_free(uintptr_t p, struct stivale2_struct* hdr) {
   freelist = &new; 
 }
 
+// credit: https://aticleworld.com/memset-in-c/ 
+void k_memset(void *arr, uint32_t c, size_t len) {
+    uint8_t *current = arr; 
+    for (size_t  i = 0; i < len; i++) {
+        current[i] = c; 
+    }
+
+    return; 
+}
+
 /**
  * Map a single page of memory into a virtual address space.
  * \param root The physical address of the top-level page table structure
  * \param address The virtual address to map into the address space, must be page-aligned
- * \param user Should the page be user-accessible?
+ * \param usable Should the page be user-accessible?
  * \param writable Should the page be writable?
  * \param executable Should the page be executable?
  * \returns true if the mapping succeeded, or false if there was an error
  */
-bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable, bool executable, struct stivale2_struct* hdr) {
+bool vm_map(uintptr_t root, uintptr_t address, bool usable, bool writable, bool executable, struct stivale2_struct* hdr) {
   
   // separate virtual address into pieces
   uint16_t indices[] = {
@@ -436,30 +446,66 @@ bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable, bool ex
   // find the first table 
   pt_entry_t * table = (pt_entry_t *)(root + hhdm_base); 
 
-  // go through the four level page table
+  // go through the four level page table until we reach level 1
   for (int i = 4; i > 0; i--) {
     uint16_t index = indices[i]; 
 
-    // check if table is there
-    //if () {}
-
+    // check if table is there, if it is life is easy
     if (table[index].present) {
-      kprintf("   level %d (index %d of %p)\n", i, index, table); 
-      kprintf("      %s", table[index].user ? "user " : "kernel "); 
-      kprintf("%s", table[index].writable ? "writable " : ""); 
-      kprintf("%s", table[index].no_execute ? "" : "executable"); 
 
-      // Get physical address of the next level table
+      // if we are at the last level of table, check if something is already there
+      if (index == 1) {
+        // yes there is - do not rewrite
+        return false; 
+      }
+
+      // otherwise, get physical address of the next level table
       table_phys = table[index].address << 12; 
       table = (pt_entry_t*)(table_phys + hhdm_base); 
 
-      kprintf(" ->  %p\n", table_phys); 
+    } else { // table is not there, life is hard :(
+      // try and add a new table (this is physical address) 
+      uintptr_t new_table_phys = pmem_alloc(hdr); 
+      if (new_table_phys == 0) {
+        // out of space, fail and return
+        return false; 
+      }
 
-    } else {
-      // allocate a page for it?
-      //return; 
+      // make it virtual to create a page table and cast
+      pt_entry_t * new_table = (pt_entry_t*)(new_table_phys + hhdm_base); 
+
+      // zero it out
+      k_memset(new_table, 0, sizeof(new_table));
+
+      // update previous table to have the newly allocated table
+      table[index].present = 1; 
+      table[index] = *new_table; 
+
+      // if we're at the "last" level 
+      if (index == 1) {
+        // then set table to be params
+        new_table->no_execute = executable;
+        new_table->user = usable;
+        new_table->writable = writable; 
+
+        // set address 
+        new_table->address = new_table_phys; 
+
+        // whoohooo! we did it, exit pls
+        return true; 
+      } 
+
+      // we're not at the end
+      // set new table to be readable, writable and user accessible and give address
+      new_table->no_execute = 0;
+      new_table->user = 1;
+      new_table->writable = 1; 
+      new_table->address = new_table_phys; 
+
+      // try and get to the next table
+      table_phys = table[index].address << 12; 
+      table = (pt_entry_t*)(table_phys + hhdm_base); 
     }
-
   }
 }
 
