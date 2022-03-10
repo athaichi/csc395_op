@@ -416,8 +416,51 @@ void pmem_free(uintptr_t p, struct stivale2_struct* hdr) {
  * \param executable Should the page be executable?
  * \returns true if the mapping succeeded, or false if there was an error
  */
-bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable, bool executable) {
-  //do this at some point
+bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable, bool executable, struct stivale2_struct* hdr) {
+  
+  // separate virtual address into pieces
+  uint16_t indices[] = {
+    address & 0xFFF,         // offset
+    (address >> 12) & 0x1FF, // level 1
+    (address >> 21) & 0x1FF, // level 2
+    (address >> 30) & 0x1FF, // level 3
+    (address >> 39) & 0x1FF, // level 4
+  };
+
+  // create our physical table pointer
+  uintptr_t table_phys = root; 
+
+  // get hhdm tag 
+  uintptr_t hhdm_base = (uintptr_t)(get_hhdm(hdr));
+
+  // find the first table 
+  pt_entry_t * table = (pt_entry_t *)(root + hhdm_base); 
+
+  // go through the four level page table
+  for (int i = 4; i > 0; i--) {
+    uint16_t index = indices[i]; 
+
+    // check if table is there
+    //if () {}
+
+    if (table[index].present) {
+      kprintf("   level %d (index %d of %p)\n", i, index, table); 
+      kprintf("      %s", table[index].user ? "user " : "kernel "); 
+      kprintf("%s", table[index].writable ? "writable " : ""); 
+      kprintf("%s", table[index].no_execute ? "" : "executable"); 
+
+      // Get physical address of the next level table
+      table_phys = table[index].address << 12; 
+      table = (pt_entry_t*)(table_phys + hhdm_base); 
+
+      kprintf(" ->  %p\n", table_phys); 
+
+    } else {
+      // allocate a page for it?
+      //return; 
+    }
+
+  }
 }
 
 // END NEW STUFF ~~~~~~~
