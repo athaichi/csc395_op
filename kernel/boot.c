@@ -504,7 +504,7 @@ char getkey(uint8_t code) {
 
 // circular buffer and read/write pointers
 char buffer[100]; 
-int8_t buffer_length = 0; // number of characters currently in the buffer
+volatile int8_t buffer_length = 0; // number of characters currently in the buffer
 int8_t reading_index = 0; 
 int8_t writing_index = 0; 
 
@@ -522,10 +522,19 @@ void keyboard_interrupt(interrupt_context_t* ctx) {
   writing_index++; 
   buffer_length++; 
 
-  // if we reach the end of the index, loop back too the beginning
+  // if we reach the end of the index, loop back to the beginning
   if (writing_index >= 100) {
     writing_index = 0; 
   }
+
+  kprintf("finished interrupt\n");
+
+  // check if circular buffer works - it works!
+  // kprint_c(buffer[reading_index]); 
+  // reading_index++; 
+  // if (reading_index >= 100) {
+  //   reading_index = 0; 
+  // }
 
   outb(PIC1_COMMAND, PIC_EOI); 
 }
@@ -540,9 +549,11 @@ char kgetc() {
 
   // hang around until something enters the buffer
   while (buffer_length == 0) {
-    ; 
+    kprint_c('0'); 
+
   }
 
+  kprintf("interrput has happened and we're back in kgetc()...");
   // get the next character off the buffer
   char returned = buffer[reading_index]; 
 
@@ -554,6 +565,8 @@ char kgetc() {
   if (reading_index >= 100) { 
     reading_index = 0; 
   }
+
+  kprintf("about to hit the return\n");
   
   return returned; 
 }
@@ -699,10 +712,10 @@ void _start(struct stivale2_struct* hdr) {
   //kprintf("interrupt should be above this\n"); 
 
   // test kgetc()
-  // for (int i = 0; i < 10; i++) {
-  //   char c = kgetc(); 
-  //   kprint_c(c); 
-  // }
+  for (int i = 0; i < 10; i++) {
+    char c = kgetc(); 
+    kprint_c(c); 
+  }
 
   // kprintf("Finished kgetc()!\n"); 
 
