@@ -350,27 +350,12 @@ void translate(void* address, struct stivale2_struct* hdr) {
 //               physical address = virtual address - hhdm address
 
 // global! gets set in mem_init
-uintptr_t hhdm_base = NULL; 
-
-// this does a whole bunch of useful init stuff: 
-/*
-- sets up global hhdm base
-- puts stuff in the freelist
-
-*/
-void mem_init(struct stivale2_struct* hdr) {
-  // set global
-  hhdm_base = (uintptr_t)(get_hhdm(hdr));
-
-  // put stuff in freelist
-
-
-}
+uintptr_t hhdm_base = 0; 
 
 // do this via a linked list
 typedef struct pmem_freeentry {
   uintptr_t address; // physical address stored virtually
-  uintptr_t next;
+  struct pmem_freeentry * next;
 } __attribute__((packed)) pmem_freeentry_t;  
 
 // set up pointer to the front of the freelist
@@ -395,7 +380,7 @@ uintptr_t pmem_alloc() {
   uintptr_t allocated = (freelist->address - hhdm_base); 
 
   // move freelist pointer to the next page in freelist
-  freelist = (pmem_freeentry_t*)freelist->next; 
+  freelist = freelist->next; 
 
   return allocated; 
 }
@@ -413,10 +398,35 @@ void pmem_free(uintptr_t p) {
   // add the entry to the beginning of the freelist
   // convert physical address to be stored virtually 
   new->address = (p + hhdm_base); 
-  new->next = (uintptr_t)freelist; 
+  new->next = freelist; 
 
-  // move freelist to new begining node
+  // move freelist pointer to new beginning node
   freelist = new; 
+}
+
+// this does a whole bunch of useful init stuff: 
+/*
+- sets up global hhdm base
+- puts stuff in the freelist
+*/
+void mem_init(struct stivale2_struct* hdr) {
+  // set global
+  hhdm_base = (uintptr_t)(get_hhdm(hdr));
+
+  // put stuff in freelist
+  struct stivale2_struct_tag_memmap* memmap = find_tag(hdr, STIVALE2_STRUCT_TAG_MEMMAP_ID);
+  for(uint64_t current = 0; current < memmap->entries; current++) {
+    struct stivale2_mmap_entry cur = memmap->memmap[current]; 
+    
+    // if section of memory is usable or bootloader reclaimable
+    // usable/bootloader reclaimable memory is automatically 0x1000 size and page aligned per stivale2 specs
+    //if((cur.type == 1) || (cur.type == 0x1000)) { 
+    if (cur.type == 1) {
+      // add it to the freelist
+      kprintf("adding a page\n");
+      pmem_free(cur.base);
+    }
+  }
 }
 
 // credit: https://aticleworld.com/memset-in-c/ 
@@ -594,15 +604,17 @@ void _start(struct stivale2_struct* hdr) {
   // kprintf("interrupt should be above this\n"); 
 
   // test vm_map()
-  uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
-  int* p = (int*)0x50004000;
-  bool result = vm_map(root, (uintptr_t)p, false, true, false, hdr);
-  if (result) {
-    *p = 123;
-    kprintf("Stored %d at %p\n", *p, p);
-  } else {
-   kprintf("vm_map failed with an error\n");
-  }
+  mem_init(hdr);
+  kprintf("init finished\n");
+  // uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
+  // int* p = (int*)0x50004000;
+  // bool result = vm_map(root, (uintptr_t)p, false, true, false);
+  // if (result) {
+  //   *p = 123;
+  //   kprintf("Stored %d at %p\n", *p, p);
+  // } else {
+  //  kprintf("vm_map failed with an error\n");
+  // }
 
 	// We're done, just hang...
 	halt();
