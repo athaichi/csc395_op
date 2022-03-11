@@ -349,6 +349,24 @@ void translate(void* address, struct stivale2_struct* hdr) {
 // NOTE TO SELF: virtual address = physical address + hhdm address
 //               physical address = virtual address - hhdm address
 
+// global! gets set in mem_init
+uintptr_t hhdm_base = NULL; 
+
+// this does a whole bunch of useful init stuff: 
+/*
+- sets up global hhdm base
+- puts stuff in the freelist
+
+*/
+void mem_init(struct stivale2_struct* hdr) {
+  // set global
+  hhdm_base = (uintptr_t)(get_hhdm(hdr));
+
+  // put stuff in freelist
+
+
+}
+
 // do this via a linked list
 typedef struct pmem_freeentry {
   uintptr_t address; // physical address stored virtually
@@ -363,7 +381,7 @@ pmem_freeentry_t * freelist = NULL;
  * Allocate a page of physical memory.
  * \returns the physical address of the allocated physical memory or 0 on error.
  */
-uintptr_t pmem_alloc(struct stivale2_struct* hdr) {
+uintptr_t pmem_alloc() {
 
   // if the freelist is empty, then darn
   if (freelist == NULL) {
@@ -371,9 +389,6 @@ uintptr_t pmem_alloc(struct stivale2_struct* hdr) {
     // halt(); 
     return 0; 
   }
-
-  // get hhdm tag 
-  uintptr_t hhdm_base = (uintptr_t)(get_hhdm(hdr));
 
   // give the first page on the freelist
   // change address to be actually physical instead of virtual
@@ -389,22 +404,19 @@ uintptr_t pmem_alloc(struct stivale2_struct* hdr) {
  * Free a page of physical memory.
  * \param p is the physical address of the page to free, which must be page-aligned.
  */
-void pmem_free(uintptr_t p, struct stivale2_struct* hdr) { 
+void pmem_free(uintptr_t p) { 
 
-  // create a new entry in the freelist
+  // create a new entry in the freelist and init it to be empty
   // this is virtual
-  pmem_freeentry_t * new; 
-
-  // get hhdm tag 
-  uintptr_t hhdm_base = (uintptr_t)(get_hhdm(hdr));
+  pmem_freeentry_t * new = NULL; 
   
   // add the entry to the beginning of the freelist
   // convert physical address to be stored virtually 
   new->address = (p + hhdm_base); 
-  new->next = freelist; 
+  new->next = (uintptr_t)freelist; 
 
   // move freelist to new begining node
-  freelist = &new; 
+  freelist = new; 
 }
 
 // credit: https://aticleworld.com/memset-in-c/ 
@@ -426,7 +438,7 @@ void k_memset(void *arr, uint32_t c, size_t len) {
  * \param executable Should the page be executable?
  * \returns true if the mapping succeeded, or false if there was an error
  */
-bool vm_map(uintptr_t root, uintptr_t address, bool usable, bool writable, bool executable, struct stivale2_struct* hdr) {
+bool vm_map(uintptr_t root, uintptr_t address, bool usable, bool writable, bool executable) {
   
   // separate virtual address into pieces
   uint16_t indices[] = {
@@ -440,9 +452,6 @@ bool vm_map(uintptr_t root, uintptr_t address, bool usable, bool writable, bool 
   // create our physical table pointer
   uintptr_t table_phys = root; 
 
-  // get hhdm tag 
-  uintptr_t hhdm_base = (uintptr_t)(get_hhdm(hdr));
-
   // find the first table 
   pt_entry_t * table = (pt_entry_t *)(root + hhdm_base); 
 
@@ -454,7 +463,7 @@ bool vm_map(uintptr_t root, uintptr_t address, bool usable, bool writable, bool 
     if (table[index].present) {
 
       // if we are at the last level of table, check if something is already there
-      if (index == 1) {
+      if (i == 1) {
         // yes there is - do not rewrite
         return false; 
       }
@@ -465,7 +474,7 @@ bool vm_map(uintptr_t root, uintptr_t address, bool usable, bool writable, bool 
 
     } else { // table is not there, life is hard :(
       // try and add a new table (this is physical address) 
-      uintptr_t new_table_phys = pmem_alloc(hdr); 
+      uintptr_t new_table_phys = pmem_alloc(); 
       if (new_table_phys == 0) {
         // out of space, fail and return
         return false; 
@@ -475,21 +484,18 @@ bool vm_map(uintptr_t root, uintptr_t address, bool usable, bool writable, bool 
       pt_entry_t * new_table = (pt_entry_t*)(new_table_phys + hhdm_base); 
 
       // zero it out
-      k_memset(new_table, 0, sizeof(new_table));
+      k_memset(new_table, 0, 0x1000);
 
       // update previous table to have the newly allocated table
       table[index].present = 1; 
-      table[index] = *new_table; 
+      table[index].address = new_table_phys >> 12; 
 
       // if we're at the "last" level 
-      if (index == 1) {
+      if (i == 1) {
         // then set table to be params
-        new_table->no_execute = executable;
-        new_table->user = usable;
-        new_table->writable = writable; 
-
-        // set address 
-        new_table->address = new_table_phys; 
+        table[index].no_execute = !executable;
+        table[index].user = usable;
+        table[index].writable = writable; 
 
         // whoohooo! we did it, exit pls
         return true; 
@@ -497,16 +503,19 @@ bool vm_map(uintptr_t root, uintptr_t address, bool usable, bool writable, bool 
 
       // we're not at the end
       // set new table to be readable, writable and user accessible and give address
-      new_table->no_execute = 0;
-      new_table->user = 1;
-      new_table->writable = 1; 
-      new_table->address = new_table_phys; 
+      table[index].no_execute = 0;
+      table[index].user = 1;
+      table[index].writable = 1; 
 
       // try and get to the next table
       table_phys = table[index].address << 12; 
       table = (pt_entry_t*)(table_phys + hhdm_base); 
     }
   }
+
+  // if you're here, you've failed somehow
+  kprintf("(vm_map) idk how you've got here but you're not supposed to be here\n"); 
+  return false; 
 }
 
 // END NEW STUFF ~~~~~~~
@@ -582,7 +591,18 @@ void _start(struct stivale2_struct* hdr) {
   //translate(usable_memory, hdr);
   //translate(NULL, hdr); 
 
-  kprintf("interrupt should be above this\n"); 
+  // kprintf("interrupt should be above this\n"); 
+
+  // test vm_map()
+  uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
+  int* p = (int*)0x50004000;
+  bool result = vm_map(root, (uintptr_t)p, false, true, false, hdr);
+  if (result) {
+    *p = 123;
+    kprintf("Stored %d at %p\n", *p, p);
+  } else {
+   kprintf("vm_map failed with an error\n");
+  }
 
 	// We're done, just hang...
 	halt();
