@@ -527,15 +527,6 @@ void keyboard_interrupt(interrupt_context_t* ctx) {
     writing_index = 0; 
   }
 
-  kprintf("finished interrupt\n");
-
-  // check if circular buffer works - it works!
-  // kprint_c(buffer[reading_index]); 
-  // reading_index++; 
-  // if (reading_index >= 100) {
-  //   reading_index = 0; 
-  // }
-
   outb(PIC1_COMMAND, PIC_EOI); 
 }
 
@@ -549,11 +540,11 @@ char kgetc() {
 
   // hang around until something enters the buffer
   while (buffer_length == 0) {
-    kprint_c('0'); 
+    //kprint_c('0'); 
 
   }
 
-  kprintf("interrput has happened and we're back in kgetc()...");
+  //kprintf("interrput has happened and we're back in kgetc()...");
   // get the next character off the buffer
   char returned = buffer[reading_index]; 
 
@@ -566,7 +557,7 @@ char kgetc() {
     reading_index = 0; 
   }
 
-  kprintf("about to hit the return\n");
+  //kprintf("about to hit the return\n");
   
   return returned; 
 }
@@ -712,9 +703,8 @@ void _start(struct stivale2_struct* hdr) {
   //kprintf("interrupt should be above this\n"); 
 
   // test kgetc()
-  for (int i = 0; i < 10; i++) {
-    char c = kgetc(); 
-    kprint_c(c); 
+  while(1) {
+    kprintf("%c", kgetc()); 
   }
 
   // kprintf("Finished kgetc()!\n"); 
