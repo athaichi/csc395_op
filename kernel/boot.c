@@ -270,7 +270,7 @@ uintptr_t read_cr3() {
 // create a helper to get physical to virtual 
 void* get_hhdm(struct stivale2_struct* hdr) {
   struct stivale2_struct_tag_hhdm* hhdm = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
-  return hhdm; 
+  return (uintptr_t)hhdm->addr; 
 }
 
 /**
@@ -354,7 +354,6 @@ uintptr_t hhdm_base = 0;
 
 // do this via a linked list
 typedef struct pmem_freeentry {
-  uintptr_t address; // physical address stored virtually
   struct pmem_freeentry * next;
 } __attribute__((packed)) pmem_freeentry_t;  
 
@@ -377,7 +376,7 @@ uintptr_t pmem_alloc() {
 
   // give the first page on the freelist
   // change address to be actually physical instead of virtual
-  uintptr_t allocated = (freelist->address - hhdm_base); 
+  uintptr_t allocated = (uintptr_t)(freelist) - hhdm_base; 
 
   // move freelist pointer to the next page in freelist
   freelist = freelist->next; 
@@ -391,17 +390,20 @@ uintptr_t pmem_alloc() {
  */
 void pmem_free(uintptr_t p) { 
 
+  //kprintf("freeing %p, freelist: %p\n", p, freelist); 
+
   // create a new entry in the freelist and init it to be empty
   // this is virtual
   pmem_freeentry_t * new = NULL; 
   
   // add the entry to the beginning of the freelist
   // convert physical address to be stored virtually 
-  new->address = (p + hhdm_base); 
+  new = (pmem_freeentry_t*)(p + hhdm_base); 
   new->next = freelist; 
 
   // move freelist pointer to new beginning node
   freelist = new; 
+
 }
 
 // this does a whole bunch of useful init stuff: 
@@ -412,6 +414,7 @@ void pmem_free(uintptr_t p) {
 void mem_init(struct stivale2_struct* hdr) {
   // set global
   hhdm_base = (uintptr_t)(get_hhdm(hdr));
+  //kprintf("hhdm is %p\n", hhdm_base);
 
   // put stuff in freelist
   struct stivale2_struct_tag_memmap* memmap = find_tag(hdr, STIVALE2_STRUCT_TAG_MEMMAP_ID);
@@ -423,8 +426,17 @@ void mem_init(struct stivale2_struct* hdr) {
     //if((cur.type == 1) || (cur.type == 0x1000)) { 
     if (cur.type == 1) {
       // add it to the freelist
-      kprintf("adding a page\n");
-      pmem_free(cur.base);
+      kprintf("found an entry\n");
+      uint64_t curr, end = 0; 
+      curr = cur.base;
+      end = cur.base + cur.length; 
+      //kprintf("start: %p, end: %p\n", curr, end); 
+       while (curr < end) {
+        pmem_free(curr); 
+         //kprintf("subdivide...");
+         curr += 0x1000; 
+         //while(1) {}; 
+       } 
     }
   }
 }
@@ -606,15 +618,15 @@ void _start(struct stivale2_struct* hdr) {
   // test vm_map()
   mem_init(hdr);
   kprintf("init finished\n");
-  // uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
-  // int* p = (int*)0x50004000;
-  // bool result = vm_map(root, (uintptr_t)p, false, true, false);
-  // if (result) {
-  //   *p = 123;
-  //   kprintf("Stored %d at %p\n", *p, p);
-  // } else {
-  //  kprintf("vm_map failed with an error\n");
-  // }
+  uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
+  int* p = (int*)0x50004000;
+  bool result = vm_map(root, (uintptr_t)p, false, true, false);
+  if (result) {
+    *p = 123;
+    kprintf("Stored %d at %p\n", *p, p);
+  } else {
+   kprintf("vm_map failed with an error\n");
+  }
 
 	// We're done, just hang...
 	halt();
