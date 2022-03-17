@@ -508,6 +508,14 @@ volatile int8_t buffer_length = 0; // number of characters currently in the buff
 int8_t reading_index = 0; 
 int8_t writing_index = 0; 
 
+void char_read() {
+  //
+}
+
+void char_write() {
+
+}
+
 // interrupt for key presses
 __attribute__((interrupt))
 void keyboard_interrupt(interrupt_context_t* ctx) {
@@ -630,12 +638,34 @@ static struct stivale2_tag unmap_null_hdr_tag = {
   .next = (uintptr_t)&unmap_null_hdr_tag
 };
 
+//----------------------------------------------------------
+// SYSCALL STUFF:
+int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
+  kprintf("syscall %d: %d, %d, %d, %d, %d, %d\n", nr, arg0, arg1, arg2, arg3, arg4, arg5);
+  return 123;
+}
+
+int64_t SYS_WRITE(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
+  kprintf("sys write %d: %d, %d, %d, %d, %d, %d\n", nr, arg0, arg1, arg2, arg3, arg4, arg5);
+  return 123;
+}
+
+int64_t SYS_READ(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
+  kprintf("sys read %d: %d, %d, %d, %d, %d, %d\n", nr, arg0, arg1, arg2, arg3, arg4, arg5);
+  return 123;
+}
+
+extern int64_t syscall(uint64_t nr, ...);
+extern void syscall_entry();
+
 // END NEW STUFF ~~~~~~~
 
 void _start(struct stivale2_struct* hdr) {
   // We've booted! Let's start processing tags passed to use from the bootloader
   term_setup(hdr);
   idt_setup(); 
+
+  idt_set_handler(0x80, syscall_entry, IDT_TYPE_TRAP);
 
   // Print a greeting
   term_write("Hello Kernel!\n", 14);
@@ -706,6 +736,7 @@ void _start(struct stivale2_struct* hdr) {
   while(1) {
     kprintf("%c", kgetc()); 
   }
+
 
   // kprintf("Finished kgetc()!\n"); 
 
