@@ -508,6 +508,14 @@ volatile int8_t buffer_length = 0; // number of characters currently in the buff
 int8_t reading_index = 0; 
 int8_t writing_index = 0; 
 
+void char_read() {
+  //
+}
+
+void char_write() {
+
+}
+
 // interrupt for key presses
 __attribute__((interrupt))
 void keyboard_interrupt(interrupt_context_t* ctx) {
@@ -646,6 +654,16 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2
   return 123;
 }
 
+int64_t SYS_WRITE(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
+  kprintf("sys write %d: %d, %d, %d, %d, %d, %d\n", nr, arg0, arg1, arg2, arg3, arg4, arg5);
+  return 123;
+}
+
+int64_t SYS_READ(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
+  kprintf("sys read %d: %d, %d, %d, %d, %d, %d\n", nr, arg0, arg1, arg2, arg3, arg4, arg5);
+  return 123;
+}
+
 extern int64_t syscall(uint64_t nr, ...);
 extern void syscall_entry();
 
@@ -724,10 +742,10 @@ void _start(struct stivale2_struct* hdr) {
   //kprintf("interrupt should be above this\n"); 
 
   // test kgetc()
-  for (int i = 0; i < 10; i++) {
-    char c = kgetc(); 
-    kprint_c(c); 
-  }
+  // for (int i = 0; i < 10; i++) {
+  //   char c = kgetc(); 
+  //   kprint_c(c); 
+  // }
 
   // kprintf("Finished kgetc()!\n"); 
 
