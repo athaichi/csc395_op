@@ -508,11 +508,32 @@ volatile int8_t buffer_length = 0; // number of characters currently in the buff
 int8_t reading_index = 0; 
 int8_t writing_index = 0; 
 
-void char_read() {
-  //
+char char_read() {
+  // get character off of buffer
+  char returned = buffer[reading_index]; 
+
+  // move the pointer to the next character to read and decrease buffer length
+  reading_index++; 
+  buffer_length--; 
+
+  // check if we need to loop back around to the beginning of the array
+  if (reading_index >= 100) { 
+    reading_index = 0; 
+  }
+
+  return returned; 
 }
 
-void char_write() {
+void char_write(char key) {
+  // add it to the buffer
+  buffer[writing_index] = key; 
+  writing_index++; 
+  buffer_length++; 
+
+  // if we reach the end of the index, loop back to the beginning
+  if (writing_index >= 100) {
+    writing_index = 0; 
+  }
 
 }
 
@@ -525,15 +546,8 @@ void keyboard_interrupt(interrupt_context_t* ctx) {
   // make it the actual character
   char key = getkey(code);  
 
-  // add it to the buffer
-  buffer[writing_index] = key; 
-  writing_index++; 
-  buffer_length++; 
-
-  // if we reach the end of the index, loop back to the beginning
-  if (writing_index >= 100) {
-    writing_index = 0; 
-  }
+  // write character to buffer
+  char_write(key); 
 
   outb(PIC1_COMMAND, PIC_EOI); 
 }
@@ -549,22 +563,11 @@ char kgetc() {
   // hang around until something enters the buffer
   while (buffer_length == 0) {
     //kprint_c('0'); 
-
   }
 
-  //kprintf("interrput has happened and we're back in kgetc()...");
-  // get the next character off the buffer
-  char returned = buffer[reading_index]; 
+  char returned = char_read(); 
 
-  // move the pointer to the next character to read and decrease buffer length
-  reading_index++; 
-  buffer_length--; 
-
-  // check if we need to loop back around to the beginning of the array
-  if (reading_index >= 100) { 
-    reading_index = 0; 
-  }
-
+  //kprintf("interrput has happened and we're back in kgetc()...")
   //kprintf("about to hit the return\n");
   
   return returned; 
@@ -657,6 +660,8 @@ int64_t SYS_READ(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2, uint6
 
 extern int64_t syscall(uint64_t nr, ...);
 extern void syscall_entry();
+extern void syscall_write(); 
+extern void syscall_read(); 
 
 // END NEW STUFF ~~~~~~~
 
@@ -733,15 +738,9 @@ void _start(struct stivale2_struct* hdr) {
   //kprintf("interrupt should be above this\n"); 
 
   // test kgetc()
-  while(1) {
-    kprintf("%c", kgetc()); 
-  }
-
-
-  // kprintf("Finished kgetc()!\n"); 
-
-  // test circular buffer: 
-  
+  // while(1) {
+  //   kprintf("%c", kgetc()); 
+  // }
 
 	// We're done, just hang...
 	halt();
