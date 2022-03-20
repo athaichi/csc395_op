@@ -8,6 +8,10 @@
 #include "pic.h"
 #include "port.h"
 
+// Define read/write syscalls!
+#define SYS_READ 0
+#define SYS_WRITE 1
+
 // Reserve space for the stack
 static uint8_t stack[8192];
 
@@ -537,6 +541,21 @@ void char_write(char key) {
 
 }
 
+char read(int filedescriptor) {
+  // validate file descriptor
+  if (filedescriptor != 0) { return -1; }
+  char_read(); 
+  return 0; 
+}
+
+char write(int filedescriptor, char key) {
+  if ((filedescriptor != 1) || (filedescriptor != 2)) { return -1; }
+  char_write(key);
+  return 0; 
+}
+
+
+
 // interrupt for key presses
 __attribute__((interrupt))
 void keyboard_interrupt(interrupt_context_t* ctx) {
@@ -645,23 +664,21 @@ static struct stivale2_tag unmap_null_hdr_tag = {
 // SYSCALL STUFF:
 int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
   kprintf("syscall %d: %d, %d, %d, %d, %d, %d\n", nr, arg0, arg1, arg2, arg3, arg4, arg5);
+  
+  // if we are reading, call the read function
+  if (nr == SYS_READ) {char_read(); }
+
+  // if we are writing, call the write function
+  if (nr == SYS_WRITE) {char_write(arg0); }
+
   return 123;
 }
 
-int64_t SYS_WRITE(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
-  kprintf("sys write %d: %d, %d, %d, %d, %d, %d\n", nr, arg0, arg1, arg2, arg3, arg4, arg5);
-  return 123;
-}
 
-int64_t SYS_READ(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
-  kprintf("sys read %d: %d, %d, %d, %d, %d, %d\n", nr, arg0, arg1, arg2, arg3, arg4, arg5);
-  return 123;
-}
 
 extern int64_t syscall(uint64_t nr, ...);
 extern void syscall_entry();
-extern void syscall_write(); 
-extern void syscall_read(); 
+ 
 
 // END NEW STUFF ~~~~~~~
 
@@ -741,6 +758,28 @@ void _start(struct stivale2_struct* hdr) {
   // while(1) {
   //   kprintf("%c", kgetc()); 
   // }
+
+  // test read
+  char buf[6] = "hello";
+  long rc = syscall(SYS_READ, 0, buf, 5);
+  if (rc <= 0) {
+    kprintf("read failed\n");
+  } else {
+    buf[rc] = '\0';
+    kprintf("read '%s'\n", buf);
+  }
+
+  // test write
+  char buf2[6]; 
+  long rc2 = syscall(SYS_WRITE, 'h', buf2, 5); 
+  if (rc <= 0) {
+    kprintf("write failed\n"); 
+  } else {
+    buf2[rc+1] = '\0';
+    kprintf("wrote '%s'\n", buf2); 
+  }
+
+
 
 	// We're done, just hang...
 	halt();
