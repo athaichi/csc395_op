@@ -249,7 +249,6 @@ void _start(struct stivale2_struct* hdr) {
 
   // Print a greeting
   term_write("Hello Kernel!\n", 14);
-  term_write("this is a test\n", 15);
 
   //all_tests(); 
 

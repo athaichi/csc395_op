@@ -22,7 +22,14 @@ boot.c
 -------
 Does basic setup for the project and allows us to write things to the terminal. 
 * `_start_` is the equivalent to `main()` in C
-* Make sure `term_setup()` is called almost immediately in `_start_`.  
+* Make sure the following things are called in `_start_` in this order:  
+    * `term_setup()` - allows you to write to the terminal, integral for printing
+    * `idt_setup()` - creates an IDT and a bunch of basic handlers
+    * `pic_init()` 
+    * `pic_unmask_irq(1)` - together with `pic_init()` allows you to print characters
+* These other things should also get called at some point: 
+    * `idt_set_handler(0x80, syscall_entry, IDT_TYPE_TRAP)` - allow us to make system calls
+    * `idt_set_handler(IRQ1_INTERRUPT, keyboard_interrupt, IDT_TYPE_TRAP)` - allow us to have keyboard presses
 
 interrupts.h
 ----------
@@ -34,6 +41,10 @@ _Variables_
 - `IDT_CODE_SELECTOR`
 - `IDT_TYPE_INTERRUPT`
 - `IDT_TYPE_TRAP` 
+
+_Structs_
+- `idt_entry_t`: an entry in the IDT
+- `interrupt_context_t`: you need this to create an interrupt handler 
 
 kprint.h
 --------
@@ -53,6 +64,7 @@ _Functions_
 - `void usable_memory(struct stivale2_struct* hdr)`: prints all usable memory to the terminal
     - First interval is the range of physical memory, second interval is the correspondingly mapped virtual memory 
 - `void* find_tag(struct stivale2_struct* hdr, uint64_t id)`: return an array of entries in the `hdr` that have a given tag 
+- `void k_memset(void *arr, uint32_t c, size_t len)`: sets an area of memory to a single value `c`
 
 page.h
 ------
