@@ -4,6 +4,9 @@
 
 #include "kprint.h"
 
+typedef void (*term_write_t)(const char*, size_t);
+extern term_write_t term_write;
+
 // credit: https://stackoverflow.com/questions/3213827/how-to-iterate-over-a-string-in-c 
 uint64_t kstrlen(const char* str) {
   uint64_t len = 0;
@@ -44,8 +47,9 @@ void kprint_d(uint64_t value){
   }
 
   // print the array: 
-  for(place; place < 20; place++) {
+  while(place < 20) {
     kprint_c(digits[place] + 48); // 48 is value of 0 in ascii (aka offset is needed)
+    place++; 
   }
 }
 
@@ -72,17 +76,19 @@ void kprint_x(uint64_t value) {
   }
 
   // print the array: 
-  for(place; place < 16; place++) {
+  while (place < 16) {
     if (digits[place] < 10) { kprint_c(digits[place] + 48); } // 48 is value of 0 in ascii (aka offset is needed)
     else { kprint_c(digits[place] + 97 - 10); } // add 97 to get to 'a', -10 to find offset within a-f
+
+    place++; 
   }
+
 }
 
 void kprint_p(void* ptr) {
-  uint64_t ptr_useful = (uint64_t)ptr; 
   kprint_c('0'); 
   kprint_c('x'); 
-  kprint_x(ptr); 
+  kprint_x((uint64_t)ptr); 
   return; 
 }
 

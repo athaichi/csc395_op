@@ -5,6 +5,7 @@
 #include "stivale2.h"
 #include "util.h"
 #include "interrupts.h"
+#include "kprint.h"
 
 // A struct the matches the layout of an IDT entry
 typedef struct idt_entry {
