@@ -59,3 +59,13 @@ void* find_tag(struct stivale2_struct* hdr, uint64_t id) {
   // No matching tag found
 	return NULL;
 }
+
+// credit: https://aticleworld.com/memset-in-c/ 
+void k_memset(void *arr, uint32_t c, size_t len) {
+    uint8_t *current = arr; 
+    for (size_t  i = 0; i < len; i++) {
+        current[i] = c; 
+    }
+
+    return; 
+}
