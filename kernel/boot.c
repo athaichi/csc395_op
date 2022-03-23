@@ -610,6 +610,65 @@ bool vm_unmap(uintptr_t root, uintptr_t address) {
   return false; 
 }
 
+/**
+ * Change the protections for a page in a virtual address space
+ * \param root The physical address of the top-level page table structure
+ * \param address The virtual address to update
+ * \param user Should the page be user-accessible or kernel only?
+ * \param writable Should the page be writable?
+ * \param executable Should the page be executable?
+ * \returns true if successful, or false if anything goes wrong (e.g. page is not mapped)
+ */
+bool vm_protect(uintptr_t root, uintptr_t address, bool user, bool writable, bool executable){
+  // separate virtual address into pieces
+  uint16_t indices[] = {
+    address & 0xFFF,         // offset
+    (address >> 12) & 0x1FF, // level 1
+    (address >> 21) & 0x1FF, // level 2
+    (address >> 30) & 0x1FF, // level 3
+    (address >> 39) & 0x1FF, // level 4
+  };
+
+  // create our physical table pointer
+  uintptr_t table_phys = root; 
+
+  // find the first table 
+  pt_entry_t * table = (pt_entry_t *)(root + hhdm_base); 
+
+  // go through the four level page table until we reach level 1
+  for (int i = 4; i > 0; i--) {
+    uint16_t index = indices[i]; 
+
+    // check if table is there, if it is life is easy
+    if (table[index].present) {
+
+      // if we are at the last level of table, check if something is already there
+      if (i == 1) {
+        // yes there is time to change permissions
+        table[index].no_execute = !executable; 
+        table[index].user = user; 
+        table[index].writable = writable; 
+
+        // we've finished successfully!
+        return true; 
+      }
+
+      // otherwise, get physical address of the next level table
+      table_phys = table[index].address << 12; 
+      table = (pt_entry_t*)(table_phys + hhdm_base); 
+
+    } else { // table is not there -> address is not mapped in the first place
+      // oh no! something has gone wrong :(
+      return false; 
+    }
+      
+  }
+
+  // if you're here, you've failed somehow
+  kprintf("(vm_protect) idk how you've got here but you're not supposed to be here\n"); 
+  return false; 
+}
+
 uint64_t read_cr0() {
   uintptr_t value;
   __asm__("mov %%cr0, %0" : "=r" (value));
@@ -728,6 +787,13 @@ void _start(struct stivale2_struct* hdr) {
     kprintf("Removed %d at %p, number of free pages is now %d\n", *p, p, free_page_counter);
   } else {
    kprintf("vm_unmap failed with an error\n");
+  }
+
+  // test protect - but badly
+  p = (int*)0x50004000; // from first vm_map test
+  result = vm_protect(root, (uintptr_t)p, false, true, true); 
+  if (result) {
+    kprintf("Changed protections at %p, \nnumber of free pages should be the same %d", p, free_page_counter);
   }
 
 	// We're done, just hang...
