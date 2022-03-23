@@ -754,14 +754,15 @@ void _start(struct stivale2_struct* hdr) {
 
   // kprintf("interrupt should be above this\n"); 
 
+  mem_init(hdr);
+  kprintf("init finished\n");
+
   // test vm_map()
   // Enable write protection
   uint64_t cr0 = read_cr0();
   cr0 |= 0x10000;
   write_cr0(cr0);
-
-  mem_init(hdr);
-  kprintf("init finished\n");
+  //    with unmapped addresses
   uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
   int* p = (int*)0x50004000;
   bool result = vm_map(root, (uintptr_t)p, false, true, false);
@@ -769,7 +770,7 @@ void _start(struct stivale2_struct* hdr) {
     *p = 123;
     kprintf("Stored %d at %p, number of free pages is now %d\n", *p, p, free_page_counter);
   } else {
-   kprintf("vm_map failed with an error\n");
+   kprintf("vm_map failed with an error, freepage number unchanged %d\n", free_page_counter);
   }
 
   p = (int*)0x54739500; 
@@ -778,10 +779,20 @@ void _start(struct stivale2_struct* hdr) {
     *p = 123;
     kprintf("Stored %d at %p, number of free pages is now %d\n", *p, p, free_page_counter);
   } else {
-   kprintf("vm_map failed with an error\n");
+   kprintf("vm_map failed with an error, freepage number unchanged %d\n", free_page_counter);
+  }
+
+  //    with mapped address
+  result = vm_map(root, (uintptr_t)p, false, true, false);
+  if (result) {
+    *p = 123;
+    kprintf("Stored %d at %p, number of free pages is now %d\n", *p, p, free_page_counter);
+  } else {
+   kprintf("vm_map failed with an error, freepage number unchanged %d\n", free_page_counter);
   }
 
   // test unmap
+  //    with mapped entry
   result = vm_unmap(root, (uintptr_t)p); // unmapping address 0x54739500
   if (result) {
     kprintf("Removed %d at %p, number of free pages is now %d\n", *p, p, free_page_counter);
@@ -789,12 +800,34 @@ void _start(struct stivale2_struct* hdr) {
    kprintf("vm_unmap failed with an error\n");
   }
 
+  //    with unmapped entry
+  p = (int*)0x500430020; 
+  result = vm_unmap(root, (uintptr_t)p); 
+  if (result) {
+    kprintf("Removed %d at %p, number of free pages is now %d\n", *p, p, free_page_counter);
+  } else {
+   kprintf("vm_unmap failed with an error, free page num unchanged %d\n", free_page_counter);
+  }
+
   // test protect - but badly
+  //    with mapped value
   p = (int*)0x50004000; // from first vm_map test
   result = vm_protect(root, (uintptr_t)p, false, true, true); 
   if (result) {
-    kprintf("Changed protections at %p, \nnumber of free pages should be the same %d", p, free_page_counter);
+    kprintf("Changed protections at %p, \nnumber of free pages should be the same %d\n", p, free_page_counter);
+  } else {
+    kprintf("vm_protect failed with an error, freepage num unchanged %d\n", free_page_counter); 
   }
+
+  //    with unmapped value
+  p = (int*)0x500430020; // same unmapped value used with vm_unmap test
+  result = vm_protect(root, (uintptr_t)p, false, true, true); 
+  if (result) {
+    kprintf("Changed protections at %p, \nnumber of free pages should be the same %d\n", p, free_page_counter);
+  } else {
+    kprintf("vm_protect failed with an error, freepage num unchanged %d\n", free_page_counter); 
+  }
+
 
 	// We're done, just hang...
 	halt();
