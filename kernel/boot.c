@@ -268,7 +268,7 @@ uintptr_t read_cr3() {
 }
 
 // create a helper to get physical to virtual 
-void* get_hhdm(struct stivale2_struct* hdr) {
+uintptr_t get_hhdm(struct stivale2_struct* hdr) {
   struct stivale2_struct_tag_hhdm* hhdm = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
   return (uintptr_t)hhdm->addr; 
 }
@@ -352,6 +352,9 @@ void translate(void* address, struct stivale2_struct* hdr) {
 // global! gets set in mem_init
 uintptr_t hhdm_base = 0; 
 
+// global! keep track of number of free pages - just for testing purposes
+int free_page_counter = 0;
+
 // do this via a linked list
 typedef struct pmem_freeentry {
   struct pmem_freeentry * next;
@@ -381,6 +384,9 @@ uintptr_t pmem_alloc() {
   // move freelist pointer to the next page in freelist
   freelist = freelist->next; 
 
+  // update counter - just for testing!
+  free_page_counter--; 
+
   return allocated; 
 }
 
@@ -404,7 +410,11 @@ void pmem_free(uintptr_t p) {
   // move freelist pointer to new beginning node
   freelist = new; 
 
+  // update counter - just for testing!
+  free_page_counter++; 
+
 }
+
 
 // this does a whole bunch of useful init stuff: 
 /*
@@ -435,10 +445,13 @@ void mem_init(struct stivale2_struct* hdr) {
         pmem_free(curr); 
          //kprintf("subdivide...");
          curr += 0x1000; 
+         free_page_counter++; 
          //while(1) {}; 
        } 
     }
   }
+
+  kprintf("number of free pages are: %d", free_page_counter); 
 }
 
 // credit: https://aticleworld.com/memset-in-c/ 
@@ -540,6 +553,73 @@ bool vm_map(uintptr_t root, uintptr_t address, bool usable, bool writable, bool 
   return false; 
 }
 
+/**
+ * Unmap a page from a virtual address space
+ * \param root The physical address of the top-level page table structure
+ * \param address The virtual address to unmap from the address space
+ * \returns true if successful, or false if anything goes wrong
+ */
+bool vm_unmap(uintptr_t root, uintptr_t address) {
+  // iterate through page table to address
+  // separate virtual address into pieces
+  uint16_t indices[] = {
+    address & 0xFFF,         // offset
+    (address >> 12) & 0x1FF, // level 1
+    (address >> 21) & 0x1FF, // level 2
+    (address >> 30) & 0x1FF, // level 3
+    (address >> 39) & 0x1FF, // level 4
+  };
+
+  // create our physical table pointer
+  uintptr_t table_phys = root; 
+
+  // find the first table 
+  pt_entry_t * table = (pt_entry_t *)(root + hhdm_base); 
+
+  // go through the four level page table until we reach level 1
+  for (int i = 4; i > 0; i--) {
+    uint16_t index = indices[i]; 
+
+    // check if table is there, if it is life is easy
+    if (table[index].present) {
+
+      // if we are at the last level of table, check if something is already there
+      if (i == 1) {
+        // there is! let's unmap
+        pmem_free(table[index].address); 
+
+        // page is no longer accessible in table
+        table[index].present = false; 
+
+        // we're done!
+        return true; 
+      }
+
+      // otherwise, get physical address of the next level table
+      table_phys = table[index].address << 12; 
+      table = (pt_entry_t*)(table_phys + hhdm_base); 
+
+    } else { // table is not there -> address is not mapped in the first place
+      // oh no! something has gone wrong :(
+      return false; 
+    }
+  }
+
+  // if you're here, you've failed somehow
+  kprintf("(vm_unmap) idk how you've got here but you're not supposed to be here\n"); 
+  return false; 
+}
+
+uint64_t read_cr0() {
+  uintptr_t value;
+  __asm__("mov %%cr0, %0" : "=r" (value));
+  return value;
+}
+
+void write_cr0(uint64_t value) {
+  __asm__("mov %0, %%cr0" : : "r" (value));
+}
+
 // END NEW STUFF ~~~~~~~
 
 void _start(struct stivale2_struct* hdr) {
@@ -616,6 +696,11 @@ void _start(struct stivale2_struct* hdr) {
   // kprintf("interrupt should be above this\n"); 
 
   // test vm_map()
+  // Enable write protection
+  uint64_t cr0 = read_cr0();
+  cr0 |= 0x10000;
+  write_cr0(cr0);
+
   mem_init(hdr);
   kprintf("init finished\n");
   uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
@@ -623,9 +708,26 @@ void _start(struct stivale2_struct* hdr) {
   bool result = vm_map(root, (uintptr_t)p, false, true, false);
   if (result) {
     *p = 123;
-    kprintf("Stored %d at %p\n", *p, p);
+    kprintf("Stored %d at %p, number of free pages is now %d\n", *p, p, free_page_counter);
   } else {
    kprintf("vm_map failed with an error\n");
+  }
+
+  p = (int*)0x54739500; 
+  result = vm_map(root, (uintptr_t)p, false, true, false);
+  if (result) {
+    *p = 123;
+    kprintf("Stored %d at %p, number of free pages is now %d\n", *p, p, free_page_counter);
+  } else {
+   kprintf("vm_map failed with an error\n");
+  }
+
+  // test unmap
+  result = vm_unmap(root, (uintptr_t)p); // unmapping address 0x54739500
+  if (result) {
+    kprintf("Removed %d at %p, number of free pages is now %d\n", *p, p, free_page_counter);
+  } else {
+   kprintf("vm_unmap failed with an error\n");
   }
 
 	// We're done, just hang...
