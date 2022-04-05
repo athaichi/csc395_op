@@ -11,6 +11,7 @@
 #include "pic.h"
 #include "port.h"
 #include "systemcalls.h"
+#include "executables.h"
 
 
 
@@ -89,6 +90,8 @@ static struct stivale2_tag unmap_null_hdr_tag = {
   .next = (uintptr_t)&unmap_null_hdr_tag
 };
 
+//---------------------------------
+
  
 
 // -------------------------------------------------
@@ -149,6 +152,10 @@ void _start(struct stivale2_struct* hdr) {
   //   buf2[rc] = '\0';
   //   kprintf("wrote '%s'\n", buf2); 
   // }
+
+  // get modules
+  kprint_s("Modules: \n"); 
+  find_modules(hdr); 
 
 	// We're done, just hang...
 	halt();
