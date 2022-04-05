@@ -67,9 +67,57 @@ void term_setup(struct stivale2_struct* hdr) {
 
 // create an array of keys following scan code from 
 //   https://wiki.osdev.org/PS2_Keyboard#Scan_Code_Set_1
-//  keys not easily delt with recieve '!' as a placeholder
-uint8_t keys[] = {"!1234567890-=!!qwertyuiop[]!!asdfghjkl;'`!!zxcvbnm,./!*!!!"};
-  // esc bksp tab enter, lctrl, lshift, fwdslash rshift, lalt, sp, caploc, end at caps loc (0x3A)
+//   Everett Hayes sent me the keyboard layout code
+char keys[128] =
+{
+    0,  27, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b',   
+  '\t', /* <-- Tab */
+  'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',     
+    0, /* <-- control key */
+  'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`',  0, '\\', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/',   0,
+  '*',
+    0,  /* Alt */
+  ' ',  /* Space bar */
+    0,  /* Caps lock */
+    0,  /* 59 - F1 key ... > */
+    0,   0,   0,   0,   0,   0,   0,   0,
+    0,  /* < ... F10 */
+    0,  /* 69 - Num lock*/
+    0,  /* Scroll Lock */
+    0,  /* Home key */
+    0,  /* Up Arrow */
+    0,  /* Page Up */
+  '-',
+    0,  /* Left Arrow */
+    0,
+    0,  /* Right Arrow */
+    '+',
+    0,
+    0,
+    0,  /* Page Down */
+    0,  /* Insert Key */
+    0,  /* Delete Key */
+    0,   0,   0,
+    0,  /* F11 Key */
+    0,  /* F12 Key */
+    0,  /* All other keys are undefined */
+};
+
+// circular buffer and read/write pointers
+char buffer[100]; 
+volatile int8_t buffer_length = 0; // number of characters currently in the buffer
+int8_t reading_index = 0; 
+int8_t writing_index = 0; 
+
+void backspace() {
+  buffer_length--; 
+  reading_index--;
+
+  // check if we need to loop back around to the beginning of the array
+  if (reading_index < 0) { 
+    reading_index = 99; 
+  }
+}
 
 // take in a code and print corresponding key
 char getkey(uint8_t code) {
@@ -80,13 +128,9 @@ char getkey(uint8_t code) {
   if (code == 0x01) { return '\0'; }
   
   // backspace
-  if (code == 0x0E) { return '\0'; }
-
-  // tab
-  if (code == 0x0F) { return '\t'; }
-
-  // enter 
-  if (code == 0x1C) { return '\n'; }
+  if (code == 0x0E) { 
+    backspace();
+    return '\0'; }
 
   // left control
   if (code == 0x1D) { return '\0'; }
@@ -94,14 +138,8 @@ char getkey(uint8_t code) {
   // left/right shift
   if ((code == 0x2A) || (code == 0x36)) { return '\0'; }
 
-  // forward slash
-  if (code == 0x2B) { return '\\'; }
-
   // left alt
   if (code == 0x38) { return '\0'; }
-
-  // space
-  if (code == 0x39) { return ' '; }
 
   // caps loc
   if (code == 0x3A) { return '\0'; }
@@ -111,16 +149,10 @@ char getkey(uint8_t code) {
 
   // Handle everything else
   // ======================
-  return keys[code - 1]; 
+  return keys[code]; 
 }
 
-// circular buffer and read/write pointers
-char buffer[100]; 
-volatile int8_t buffer_length = 0; // number of characters currently in the buffer
-int8_t reading_index = 0; 
-int8_t writing_index = 0; 
-
-char char_read() {
+char read() {
   // get character off of buffer
   char returned = buffer[reading_index]; 
 
@@ -136,7 +168,7 @@ char char_read() {
   return returned; 
 }
 
-void char_write(char key) {
+void write(char key) {
   // add it to the buffer
   buffer[writing_index] = key; 
   writing_index++; 
@@ -147,19 +179,6 @@ void char_write(char key) {
     writing_index = 0; 
   }
 
-}
-
-char read(int filedescriptor) {
-  // validate file descriptor
-  if (filedescriptor != 0) { return -1; }
-  char_read(); 
-  return 0; 
-}
-
-char write(int filedescriptor, char key) {
-  if ((filedescriptor != 1) || (filedescriptor != 2)) { return -1; }
-  char_write(key);
-  return 0; 
 }
 
 
@@ -178,7 +197,7 @@ void keyboard_interrupt(interrupt_context_t* ctx) {
   //kprint_c(key); 
 
   // write character to buffer
-  char_write(key); 
+  write(key); 
 
   outb(PIC1_COMMAND, PIC_EOI); 
 }
@@ -196,7 +215,7 @@ char kgetc() {
     //kprint_c('0'); 
   }
 
-  char returned = char_read(); 
+  char returned = read(); 
 
   //kprintf("interrput has happened and we're back in kgetc()...")
   //kprintf("about to hit the return\n");
@@ -216,12 +235,12 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2
   kprintf("syscall %d: %d, %d, %d, %d, %d, %d\n", nr, arg0, arg1, arg2, arg3, arg4, arg5);
   
   // if we are reading, call the read function
-  if (nr == SYS_READ) {char_read(); }
+  if (nr == SYS_READ) {read(); return arg2; }
 
   // if we are writing, call the write function
-  if (nr == SYS_WRITE) {char_write(arg0); }
+  if (nr == SYS_WRITE) {write(arg0); return arg2; }
 
-  return 123;
+  return -1;
 }
 
 
@@ -269,24 +288,25 @@ void _start(struct stivale2_struct* hdr) {
   // }
 
   // test read
-  // char buf[6] = "hello";
-  // long rc = syscall(SYS_READ, 0, buf, 5);
-  // if (rc <= 0) {
-  //   kprintf("read failed\n");
-  // } else {
-  //   buf[rc] = '\0';
-  //   kprintf("read '%s'\n", buf);
-  // }
+  char buf[6] = "hello";
+  long rc = syscall(SYS_READ, 0, buf, 5);
+  if (rc < 0) {
+    kprintf("read failed\n");
+  } else {
+    buf[rc] = '\0';
+    kprintf("read '%s'\n", buf);
+  }
 
   // test write
-  // char buf2[6]; 
-  // long rc2 = syscall(SYS_WRITE, 'h', buf2, 5); 
-  // if (rc <= 0) {
-  //   kprintf("write failed\n"); 
-  // } else {
-  //   buf2[rc+1] = '\0';
-  //   kprintf("wrote '%s'\n", buf2); 
-  // }
+  char buf2[6]; 
+  long rc2 = syscall(SYS_WRITE, 'h', buf2, 1); 
+  if (rc2 < 0) {
+    kprintf("write failed\n"); 
+  } else {
+    rc = syscall(SYS_READ, 0, buf2, 5); 
+    buf2[rc] = '\0';
+    kprintf("wrote '%s'\n", buf2); 
+  }
 
 	// We're done, just hang...
 	halt();
