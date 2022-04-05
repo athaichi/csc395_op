@@ -130,25 +130,25 @@ void _start(struct stivale2_struct* hdr) {
   // }
 
   // test read
-  char buf[6] = "hello";
-  long rc = syscall(SYS_READ, 0, buf, 5);
-  if (rc < 0) {
-    kprintf("read failed\n");
-  } else {
-    buf[rc] = '\0';
-    kprintf("read '%s'\n", buf);
-  }
+  // char buf[6] = "hello";
+  // long rc = syscall(SYS_READ, 0, buf, 5);
+  // if (rc < 0) {
+  //   kprintf("read failed\n");
+  // } else {
+  //   buf[rc] = '\0';
+  //   kprintf("read '%s'\n", buf);
+  // }
 
-  // test write
-  char buf2[6]; 
-  long rc2 = syscall(SYS_WRITE, 'h', buf2, 1); 
-  if (rc2 < 0) {
-    kprintf("write failed\n"); 
-  } else {
-    rc = syscall(SYS_READ, 0, buf2, 5); 
-    buf2[rc] = '\0';
-    kprintf("wrote '%s'\n", buf2); 
-  }
+  // // test write
+  // char buf2[6]; 
+  // long rc2 = syscall(SYS_WRITE, 'h', buf2, 1); 
+  // if (rc2 < 0) {
+  //   kprintf("write failed\n"); 
+  // } else {
+  //   rc = syscall(SYS_READ, 0, buf2, 5); 
+  //   buf2[rc] = '\0';
+  //   kprintf("wrote '%s'\n", buf2); 
+  // }
 
 	// We're done, just hang...
 	halt();
