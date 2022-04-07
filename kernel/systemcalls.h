@@ -6,8 +6,9 @@
 
 // Functions
 char getkey(uint8_t code); 
-char read(); 
-void write(char key); 
+void read(int numchars);  
+void write(uint64_t buf, uint64_t len); 
+void char_write(char key); 
 char kgetc(); 
 
 extern int64_t syscall(uint64_t nr, ...);
