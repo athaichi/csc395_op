@@ -93,14 +93,23 @@ char getkey(uint8_t code) {
 }
 
 // system call read() function 
-void read(int numchars) {
+// fix this to handle backspace
+void read(uint64_t buf, uint64_t numchars) {
+  // create a new buffer
+  char rbuffer[numchars]; 
+
+  // fill the new buffer using kgetc
   for (int i = 0; i < numchars; i++) {
-    kgetc(); 
+    char ret = kgetc(); 
+    rbuffer[i] = ret; 
   }
+
+// point it at the new buffer
+  char* buff = rbuffer; 
+  buf = (uint64_t)buff; 
 }
 
 void write(uint64_t buf, uint64_t len) {
-
   // turn buffer into a string
   char* wbuffer = (char*)buf; 
 
@@ -159,11 +168,12 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2
   kprintf("syscall %d: %d, %d, %d, %d, %d, %d\n", nr, arg0, arg1, arg2, arg3, arg4, arg5);
   
   // if we are reading, call the read function
-  if (nr == SYS_READ) {read(arg2); return arg2; }
+  if (nr == SYS_READ) {read(arg1, arg2); return arg2; }
 
   // if we are writing, call the write function
   if (nr == SYS_WRITE) {write(arg1, arg2); return arg2; }
 
+  // file descriptor is not allowed
   return -1;
 }
 
