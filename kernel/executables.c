@@ -13,10 +13,11 @@ void find_modules(struct stivale2_struct* hdr) {
     
     //print all the modules
     //print name
-    // for (int i = 0; i<128; i++) {
-    //   kprint_c(cur.string[i]); 
-    //   if (cur.string[i] == '\0') { break; }
-    // }
+    for (int i = 0; i<128; i++) {
+      //char n = cur.string[i]; 
+      //kprint_c(n); 
+      //if (n == '\0') { break; }
+    }
     kprint_s("    0x");
     kprint_x(cur.begin); 
     kprint_s(" - 0x"); 

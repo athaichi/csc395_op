@@ -143,19 +143,19 @@ void _start(struct stivale2_struct* hdr) {
   // }
 
   // // test write
-  // char buf2[6]; 
-  // long rc2 = syscall(SYS_WRITE, 'h', buf2, 1); 
-  // if (rc2 < 0) {
-  //   kprintf("write failed\n"); 
-  // } else {
-  //   rc = syscall(SYS_READ, 0, buf2, 5); 
-  //   buf2[rc] = '\0';
-  //   kprintf("wrote '%s'\n", buf2); 
-  // }
+  char buf2[6] = "olleh"; 
+  long rc2 = syscall(SYS_WRITE, 1, buf2, 6); 
+  if (rc2 < 0) {
+    kprintf("write failed\n"); 
+  } else {
+    rc2 = syscall(SYS_READ, 0, buf2, 5); 
+    buf2[rc2] = '\0';
+    kprintf("wrote '%s'\n", buf2); 
+  }
 
   // get modules
-  kprint_s("Modules: \n"); 
-  find_modules(hdr); 
+  // kprint_s("Modules: \n"); 
+  // find_modules(hdr); 
 
 	// We're done, just hang...
 	halt();
