@@ -64,25 +64,45 @@ typedef struct elf_phdr {
 
 // ---------------------------------------------------------------
 
-void find_modules(struct stivale2_struct* hdr) {
-  struct stivale2_struct_tag_modules* modules = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
+void setup(struct stivale2_struct* hdr) {
+    // find a module
 
-  for(uint64_t current = 0; current < modules->module_count; current++) {
-    struct stivale2_module cur = modules->modules[current]; 
+    // cast it to an elf header 
+
+    // locate thhe program headerr table
+
+    // loop over the entries 
+
+        // if enttry has type LOAD and size > 0
+
+        // vm_map for the entry
+
+        // memcpy data into the virtual address
+
+        // update permissions
     
-    //print all the modules
-    //print name
-    for (int i = 0; i<128; i++) {
-      //char n = cur.string[i]; 
-      //kprint_c(n); 
-      //if (n == '\0') { break; }
-    }
-    kprint_s("    0x");
-    kprint_x(cur.begin); 
-    kprint_s(" - 0x"); 
-    kprint_x(cur.end); 
-
-    // format for next entry 
-    kprint_c('\n');
-  }
+    // cast entry point to a function pointer and run!
 }
+
+// void find_modules(struct stivale2_struct* hdr) {
+//   struct stivale2_struct_tag_modules* modules = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
+
+//   for(uint64_t current = 0; current < modules->module_count; current++) {
+//     struct stivale2_module cur = modules->modules[current]; 
+    
+//     //print all the modules
+//     //print name
+//     for (int i = 0; i<128; i++) {
+//       //char n = cur.string[i]; 
+//       //kprint_c(n); 
+//       //if (n == '\0') { break; }
+//     }
+//     kprint_s("    0x");
+//     kprint_x(cur.begin); 
+//     kprint_s(" - 0x"); 
+//     kprint_x(cur.end); 
+
+//     // format for next entry 
+//     kprint_c('\n');
+//   }
+// }
