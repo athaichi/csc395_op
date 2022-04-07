@@ -127,26 +127,9 @@ void _start(struct stivale2_struct* hdr) {
   idt_set_handler(IRQ1_INTERRUPT, keyboard_interrupt, IDT_TYPE_TRAP);
 
   // Print a greeting
-  term_write("Hello Kernel!\n", 14);
+  //term_write("Hello Kernel!\n", 14);
 
   //all_tests(); 
-
-  // test usable_memory
-  //usable_memory(hdr); 
-
-  // test idt
-  //  int* p = (int*)0x1;
-  //  *p = 123; 
-  //__asm__("int $2");
-
-
-  // test paging
-  //translate(read_cr3(), _start); 
-
-  // test kgetc()
-  // while(1) {
-  //   kprintf("%c", kgetc()); 
-  // }
 
  // test read
   char buf[6];
@@ -157,100 +140,6 @@ void _start(struct stivale2_struct* hdr) {
     buf[rc] = '\0';
     kprintf("read '%s'\n", buf);
   }
-
-  // test write
-  // syscall nr, file descriptor nr, buffer, buf length
-  long rc2 = syscall(SYS_WRITE, 1, "olleh", 5); 
-  if (rc2 < 0) {
-    kprintf("write failed\n"); 
-  } else {
-    // rc = syscall(SYS_READ, 0, buf2, 5); 
-    // buf2[rc] = '\0';
-    // kprintf("wrote '%s'\n", buf2); 
-  }
-
-
-  //translate(_start, hdr);
-  //translate(stack, hdr);  
-  //translate(usable_memory, hdr);
-  //translate(NULL, hdr); 
-
-  // kprintf("interrupt should be above this\n"); 
-
-  // mem_init(hdr);
-  // kprintf("init finished\n");
-
-  // // test vm_map()
-  // // Enable write protection
-  // uint64_t cr0 = read_cr0();
-  // cr0 |= 0x10000;
-  // write_cr0(cr0);
-  // //    with unmapped addresses
-  // uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
-  // int* p = (int*)0x50004000;
-  // bool result = vm_map(root, (uintptr_t)p, false, true, false);
-  // if (result) {
-  //   *p = 123;
-  //   kprintf("Stored %d at %p, number of free pages is now %d\n", *p, p, free_page_counter);
-  // } else {
-  //  kprintf("vm_map failed with an error, freepage number unchanged %d\n", free_page_counter);
-  // }
-
-  // p = (int*)0x54739500; 
-  // result = vm_map(root, (uintptr_t)p, false, true, false);
-  // if (result) {
-  //   *p = 123;
-  //   kprintf("Stored %d at %p, number of free pages is now %d\n", *p, p, free_page_counter);
-  // } else {
-  //  kprintf("vm_map failed with an error, freepage number unchanged %d\n", free_page_counter);
-  // }
-
-  // //    with mapped address
-  // result = vm_map(root, (uintptr_t)p, false, true, false);
-  // if (result) {
-  //   *p = 123;
-  //   kprintf("Stored %d at %p, number of free pages is now %d\n", *p, p, free_page_counter);
-  // } else {
-  //  kprintf("vm_map failed with an error, freepage number unchanged %d\n", free_page_counter);
-  // }
-
-  // // test unmap
-  // //    with mapped entry
-  // result = vm_unmap(root, (uintptr_t)p); // unmapping address 0x54739500
-  // if (result) {
-  //   kprintf("Removed %d at %p, number of free pages is now %d\n", *p, p, free_page_counter);
-  // } else {
-  //  kprintf("vm_unmap failed with an error\n");
-  // }
-
-  // //    with unmapped entry
-  // p = (int*)0x500430020; 
-  // result = vm_unmap(root, (uintptr_t)p); 
-  // if (result) {
-  //   kprintf("Removed %d at %p, number of free pages is now %d\n", *p, p, free_page_counter);
-  // } else {
-  //  kprintf("vm_unmap failed with an error, free page num unchanged %d\n", free_page_counter);
-  // }
-
-  // // test protect - but badly
-  // //    with mapped value
-  // p = (int*)0x50004000; // from first vm_map test
-  // result = vm_protect(root, (uintptr_t)p, false, true, true); 
-  // if (result) {
-  //   kprintf("Changed protections at %p, \nnumber of free pages should be the same %d\n", p, free_page_counter);
-  // } else {
-  //   kprintf("vm_protect failed with an error, freepage num unchanged %d\n", free_page_counter); 
-  // }
-
-  // //    with unmapped value
-  // p = (int*)0x500430020; // same unmapped value used with vm_unmap test
-  // result = vm_protect(root, (uintptr_t)p, false, true, true); 
-  // if (result) {
-  //   kprintf("Changed protections at %p, \nnumber of free pages should be the same %d\n", p, free_page_counter);
-  // } else {
-  //   kprintf("vm_protect failed with an error, freepage num unchanged %d\n", free_page_counter); 
-  // }
-
 
 	// We're done, just hang...
 	halt();
