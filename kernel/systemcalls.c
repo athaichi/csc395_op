@@ -92,6 +92,26 @@ char getkey(uint8_t code) {
   return keys[code]; 
 }
 
+char* kstrcat(char* dest, const char* src, int len) {
+  int oglen = kstrlen(dest); 
+  char buf[oglen+len]; 
+
+  // move over given from src
+  for (int i = 0; i < oglen; i++) {
+    buf[i] = *dest; 
+    dest++; 
+  }
+
+  // add on new stuff
+  for (int i = 0; i < len; i++) {
+    buf[oglen+i] = *src; 
+    src++; 
+  }
+
+  char* returned = buf; 
+  return returned; 
+}
+
 // system call read() function 
 // fix this to handle backspace
 void read(uint64_t buf, uint64_t numchars) {
@@ -102,7 +122,7 @@ void read(uint64_t buf, uint64_t numchars) {
   for (int i = 0; i < numchars; i++) {
     char ret = kgetc(); 
     //strcat(char*dest, const char c, size_t len) 
-    //strcat(buff, &ret, 1); 
+    kstrcat(buff, &ret, 1); 
   }
 
 // set up to return 
