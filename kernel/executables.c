@@ -18,6 +18,12 @@
 #define elf_xword uint64_t
 #define elf_sxword int64_t
 
+// Definitions for program headers
+#define LOAD 1      // loadable section
+#define W 0x2       // write premission 
+#define X 0x1       // execute permission
+#define R 0x4       // read permission
+
 // Struct for an elf64 header 
 typedef struct elf_hdr {
     char e_ident[16];       // elf identification
@@ -38,7 +44,7 @@ typedef struct elf_hdr {
 
 // struct for an elf64 section header
 typedef struct elf_shdr {
-    elf_word sh_name;       //section name
+    elf_word sh_name;       // section name
     elf_word sh_type;       // section type
     elf_xword sh_flags;     // section attributes
     elf_addr sh_addr;       // virtual address in memory
@@ -50,7 +56,7 @@ typedef struct elf_shdr {
     elf_xword sh_enttsize;  // size of entries, if section has a table
 } __attribute__((packed)) elf_shdr_t; 
 
-// struct for an elf64 program header table 
+// struct for an elf64 program header table entry
 typedef struct elf_phdr {
     elf_word p_type;        // type of segment
     elf_word p_flags;       // segment attributes
@@ -65,21 +71,35 @@ typedef struct elf_phdr {
 // ---------------------------------------------------------------
 
 void setup(struct stivale2_struct* hdr) {
-    // find a module
+    // find a module - right now hardcoded to the first module
+    struct stivale2_struct_tag_modules* moduleslist = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
+    struct stivale2_module ourmod = moduleslist->modules[0]; 
 
     // cast it to an elf header 
+    elf_hdr_t* header = (elf_hdr_t*)(ourmod.begin); 
 
-    // locate thhe program headerr table
+    // locate the program header table
+    elf_phdr_t* program_header = (elf_phdr_t*)(header + header->e_phoff); 
 
     // loop over the entries 
+    for (int i = 0; i < header->e_phnum; i++) {
 
-        // if enttry has type LOAD and size > 0
+        // if entry has type LOAD and size > 0
+        if ((program_header->p_type == LOAD) && (program_header->p_filesz > 0)) {
+
+            // convert virtual address to physical (for vm_map())
+
 
         // vm_map for the entry
+        //vm_map(uintptr_t root, uintptr_t address, bool usable, bool writable, bool executable)
+        //vm_map(????, program_header->vaddr, true, true, true); 
 
         // memcpy data into the virtual address
+        //k_memcopy();
 
         // update permissions
+        }
+    }
     
     // cast entry point to a function pointer and run!
 }
