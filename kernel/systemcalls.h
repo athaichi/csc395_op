@@ -10,6 +10,7 @@ void read(uint64_t buf, uint64_t numchars);
 void write(uint64_t buf, uint64_t len); 
 void char_write(char key); 
 char kgetc(); 
+char* kstrcat(char* dest, const char* src, int len); 
 
 extern int64_t syscall(uint64_t nr, ...);
 extern void syscall_entry();
