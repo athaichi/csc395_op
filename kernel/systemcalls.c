@@ -96,16 +96,16 @@ char getkey(uint8_t code) {
 // fix this to handle backspace
 void read(uint64_t buf, uint64_t numchars) {
   // create a new buffer
-  char rbuffer[numchars]; 
+  char* buff = (char*)buf;   
 
   // fill the new buffer using kgetc
   for (int i = 0; i < numchars; i++) {
     char ret = kgetc(); 
-    rbuffer[i] = ret; 
+    //strcat(char*dest, const char c, size_t len) 
+    //strcat(buff, &ret, 1); 
   }
 
-// point it at the new buffer
-  char* buff = rbuffer; 
+// set up to return 
   buf = (uint64_t)buff; 
 }
 
@@ -156,6 +156,9 @@ char kgetc() {
   if (reading_index >= 100) { 
     reading_index = 0; 
   } 
+
+  // check to see if it's actually useful
+  if (returned == '\0') { kgetc(); }
 
   //kprintf("interrput has happened and we're back in kgetc()...")
   //kprintf("about to hit the return\n");
