@@ -92,23 +92,55 @@ char getkey(uint8_t code) {
   return keys[code]; 
 }
 
-char read() {
-  // get character off of buffer
-  char returned = buffer[reading_index]; 
+char* kstrcat(char* dest, const char* src, int len) {
+  int oglen = kstrlen(dest); 
+  char buf[oglen+len]; 
 
-  // move the pointer to the next character to read and decrease buffer length
-  reading_index++; 
-  buffer_length--; 
-
-  // check if we need to loop back around to the beginning of the array
-  if (reading_index >= 100) { 
-    reading_index = 0; 
+  // move over given from src
+  for (int i = 0; i < oglen; i++) {
+    buf[i] = *dest; 
+    dest++; 
   }
 
+  // add on new stuff
+  for (int i = 0; i < len; i++) {
+    buf[oglen+i] = *src; 
+    src++; 
+  }
+
+  char* returned = buf; 
   return returned; 
 }
 
-void write(char key) {
+// system call read() function 
+// fix this to handle backspace
+void read(uint64_t buf, uint64_t numchars) {
+  // create a new buffer
+  char* buff = (char*)buf;   
+
+  // fill the new buffer using kgetc
+  for (int i = 0; i < numchars; i++) {
+    char ret = kgetc(); 
+    //strcat(char*dest, const char c, size_t len) 
+    kstrcat(buff, &ret, 1); 
+  }
+
+// set up to return 
+  buf = (uint64_t)buff; 
+}
+
+void write(uint64_t buf, uint64_t len) {
+  // turn buffer into a string
+  char* wbuffer = (char*)buf; 
+
+  // kprint the string 
+  for (uint64_t i = 0; i < len; i++) {
+    kprint_c(*wbuffer); 
+    wbuffer++; 
+  }
+}
+
+void char_write(char key) {
   // add it to the buffer
   buffer[writing_index] = key; 
   writing_index++; 
@@ -118,7 +150,6 @@ void write(char key) {
   if (writing_index >= 100) {
     writing_index = 0; 
   }
-
 }
 
 /**
@@ -134,7 +165,20 @@ char kgetc() {
     //kprint_c('0'); 
   }
 
-  char returned = read(); 
+  // get character off of buffer
+  char returned = buffer[reading_index]; 
+
+  // move the pointer to the next character to read and decrease buffer length
+  reading_index++; 
+  buffer_length--; 
+
+  // check if we need to loop back around to the beginning of the array
+  if (reading_index >= 100) { 
+    reading_index = 0; 
+  } 
+
+  // check to see if it's actually useful
+  if (returned == '\0') { kgetc(); }
 
   //kprintf("interrput has happened and we're back in kgetc()...")
   //kprintf("about to hit the return\n");
@@ -147,11 +191,12 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2
   kprintf("syscall %d: %d, %d, %d, %d, %d, %d\n", nr, arg0, arg1, arg2, arg3, arg4, arg5);
   
   // if we are reading, call the read function
-  if (nr == SYS_READ) {read(); return arg2; }
+  if (nr == SYS_READ) {read(arg1, arg2); return arg2; }
 
   // if we are writing, call the write function
-  if (nr == SYS_WRITE) {write(arg0); return arg2; }
+  if (nr == SYS_WRITE) {write(arg1, arg2); return arg2; }
 
+  // file descriptor is not allowed
   return -1;
 }
 

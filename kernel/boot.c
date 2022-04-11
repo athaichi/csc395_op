@@ -18,11 +18,19 @@
 // Reserve space for the stack
 static uint8_t stack[8192];
 
+
+// for testing interrupts
+static struct stivale2_tag unmap_null_hdr_tag = {
+  .identifier = STIVALE2_HEADER_TAG_UNMAP_NULL_ID,
+  .next = 0
+};
+
+
 // Request a terminal from the bootloader
 static struct stivale2_header_tag_terminal terminal_hdr_tag = {
 	.tag = {
     .identifier = STIVALE2_HEADER_TAG_TERMINAL_ID,
-    .next = 0
+    .next = (uintptr_t)&unmap_null_hdr_tag
   },
   .flags = 0
 };
@@ -61,7 +69,6 @@ void term_setup(struct stivale2_struct* hdr) {
 }
 
 // --------------------------------------------------
-
 // =======================================================
 // =======================================================
 
@@ -79,20 +86,29 @@ void keyboard_interrupt(interrupt_context_t* ctx) {
   //kprint_c(key); 
 
   // write character to buffer
-  write(key); 
+  char_write(key); 
 
   outb(PIC1_COMMAND, PIC_EOI); 
 }
 
-// for testing interrupts
-static struct stivale2_tag unmap_null_hdr_tag = {
-  .identifier = STIVALE2_HEADER_TAG_UNMAP_NULL_ID,
-  .next = (uintptr_t)&unmap_null_hdr_tag
-};
+// ==============================================
+// ==============================================
+// // ===============================================
+// // ===============================================
 
-//---------------------------------
 
- 
+// global! keep track of number of free pages - just for testing purposes
+extern int free_page_counter;
+
+uint64_t read_cr0() {
+  uintptr_t value;
+  __asm__("mov %%cr0, %0" : "=r" (value));
+  return value;
+}
+
+void write_cr0(uint64_t value) {
+  __asm__("mov %0, %%cr0" : : "r" (value));
+}
 
 // -------------------------------------------------
 
@@ -112,28 +128,12 @@ void _start(struct stivale2_struct* hdr) {
   idt_set_handler(IRQ1_INTERRUPT, keyboard_interrupt, IDT_TYPE_TRAP);
 
   // Print a greeting
-  term_write("Hello Kernel!\n", 14);
+  //term_write("Hello Kernel!\n", 14);
 
   //all_tests(); 
 
-  // test usable_memory
-  //usable_memory(hdr); 
-
-  // test idt
-  // int* p = (int*)0x1;
-  // *p = 123; 
-  //__asm__("int $2");
-
-  // test paging
-  //translate(read_cr3(), _start); 
-
-  // test kgetc()
-  // while(1) {
-  //   kprintf("%c", kgetc()); 
-  // }
-
-  // test read
-  char buf[6] = "hello";
+ // test read
+  char buf[6];
   long rc = syscall(SYS_READ, 0, buf, 5);
   if (rc < 0) {
     kprintf("read failed\n");
