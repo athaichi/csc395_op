@@ -4,6 +4,7 @@
 
 #include "kprint.h"
 #include "memory.h"
+#include "page.h"
 
 // ---------------------------------------------------------
 // | Definitions & Structs |  // NOTE: These are taken directly from ELF64 specifications
@@ -70,38 +71,65 @@ typedef struct elf_phdr {
 
 // ---------------------------------------------------------------
 
-void setup(struct stivale2_struct* hdr) {
+// implementation from https://www.geeksforgeeks.org/write-memcpy/ 
+void k_memcpy (void* src, void* dest, uint64_t size) {
+    char* csrc = (char*)src; 
+    char* cdest = (char*)dest; 
+
+    for (int i = 0; i < size; i++) {
+        cdest[i] = csrc[i]; 
+    }
+}
+
+
+void exec_setup(struct stivale2_struct* hdr) {
     // find a module - right now hardcoded to the first module
     struct stivale2_struct_tag_modules* moduleslist = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
     struct stivale2_module ourmod = moduleslist->modules[0]; 
+
+    kprintf("got modules...\n"); 
 
     // cast it to an elf header 
     elf_hdr_t* header = (elf_hdr_t*)(ourmod.begin); 
 
     // locate the program header table
     elf_phdr_t* program_header = (elf_phdr_t*)(header + header->e_phoff); 
+    kprintf("got to the header...\n"); 
 
     // loop over the entries 
     for (int i = 0; i < header->e_phnum; i++) {
+        kprintf("in loop, on round %d. type = %d\n", i, program_header->p_type); 
 
         // if entry has type LOAD and size > 0
         if ((program_header->p_type == LOAD) && (program_header->p_filesz > 0)) {
+            kprintf("got into if\n"); 
 
-            // convert virtual address to physical (for vm_map())
+            // vm_map for the entry - init set as non-executable
+            bool ret = vm_map(read_cr3(), program_header->p_vaddr, true, true, false); 
+            if (ret) {kprintf("vm mapped for section %d out of %d...\n", i, header->e_phnum); }
 
+            // memcpy data into the virtual address
+            k_memcpy(program_header + program_header->p_offset, (uintptr_t*)(program_header->p_vaddr), program_header->p_memsz); 
 
-        // vm_map for the entry
-        //vm_map(uintptr_t root, uintptr_t address, bool usable, bool writable, bool executable)
-        //vm_map(????, program_header->vaddr, true, true, true); 
+            // get flags
+            bool writable = false, executable = false; 
+            if((program_header->p_flags & 0x00000001) > 0) { executable = true; }
+            if((program_header->p_flags & 0x00000010) > 0) { writable = true; }
 
-        // memcpy data into the virtual address
-        //k_memcopy();
-
-        // update permissions
+            // update permissions -- always set usable to be true
+            vm_protect(read_cr3(), program_header->p_vaddr, true, writable, executable); 
         }
+
+        // move to next program header entry
+        program_header += sizeof(program_header); 
     }
     
     // cast entry point to a function pointer and run!
+    typedef void (*entry_fn_ptr_t)(); 
+
+    entry_fn_ptr_t entry = (entry_fn_ptr_t)header->e_entry; 
+    kprintf("got to end\n"); 
+    //entry(); 
 }
 
 // void find_modules(struct stivale2_struct* hdr) {

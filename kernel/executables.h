@@ -2,4 +2,4 @@
 
 #include "stivale2.h"
 
-void find_modules(struct stivale2_struct* hdr); 
+void exec_setup(struct stivale2_struct* hdr); 

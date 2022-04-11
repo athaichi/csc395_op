@@ -133,14 +133,21 @@ void _start(struct stivale2_struct* hdr) {
   //all_tests(); 
 
  // test read
-  char buf[6];
-  long rc = syscall(SYS_READ, 0, buf, 5);
-  if (rc < 0) {
-    kprintf("read failed\n");
-  } else {
-    buf[rc] = '\0';
-    kprintf("read '%s'\n", buf);
-  }
+  // char buf[6];
+  // long rc = syscall(SYS_READ, 0, buf, 5);
+  // if (rc < 0) {
+  //   kprintf("read failed\n");
+  // } else {
+  //   buf[rc] = '\0';
+  //   kprintf("read '%s'\n", buf);
+  // }
+
+  exec_setup(hdr); 
+
+  // char* test = "taco"; 
+  // char c = 's'; 
+  // char* new = kstrcat(test, &c, 1); 
+  // kprintf("%s", new); 
 
   // // // test write
   // char buf2[6] = "olleh"; 
