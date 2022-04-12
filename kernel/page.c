@@ -108,8 +108,13 @@ void translate(void* address, struct stivale2_struct* hdr) {
 // NOTE TO SELF: virtual address = physical address + hhdm address
 //               physical address = virtual address - hhdm address
 
-// global! gets set in mem_init
-uintptr_t hhdm_base = 0; 
+// global! gets set in init_init (in boot)
+extern uintptr_t hhdm_base; 
+
+void* ptov (uint64_t paddr) {
+  uintptr_t vaddr = (uintptr_t)(paddr + hhdm_base); 
+  return (void*)vaddr; 
+}
 
 // global! keep track of number of free pages - just for testing purposes
 int free_page_counter = 0;

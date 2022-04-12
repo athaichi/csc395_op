@@ -5,6 +5,7 @@
 uintptr_t read_cr3();
 uintptr_t get_hhdm(struct stivale2_struct* hdr);
 void translate(void* address, struct stivale2_struct* hdr);
+void* ptov (uint64_t paddr); 
 
 uintptr_t pmem_alloc(); 
 void pmem_free(uintptr_t p); 
