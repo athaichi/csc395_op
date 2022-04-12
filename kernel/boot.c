@@ -142,12 +142,17 @@ void _start(struct stivale2_struct* hdr) {
   //   kprintf("read '%s'\n", buf);
   // }
 
-  exec_setup(hdr); 
+  //exec_setup(hdr); 
 
-  // char* test = "taco"; 
-  // char c = 's'; 
-  // char* new = kstrcat(test, &c, 1); 
-  // kprintf("%s", new); 
+
+  char* test = "taco";
+  char* new = NULL;  
+  char* copy = NULL; 
+  char c = 's'; 
+  //new = kstrcat(test, &c, 1); 
+  //kprintf("%s", new); 
+  k_memcpy(test, copy, 5); 
+  kprintf("%s", copy); 
 
   // // // test write
   // char buf2[6] = "olleh"; 

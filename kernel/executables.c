@@ -96,6 +96,9 @@ void exec_setup(struct stivale2_struct* hdr) {
     elf_phdr_t* program_header = (elf_phdr_t*)(header + header->e_phoff); 
     kprintf("got to the header...\n"); 
 
+    // get physical address
+    uintptr_t cr3 = read_cr3() & 0xFFFFFFFFFFFFF000;
+
     // loop over the entries 
     for (int i = 0; i < header->e_phnum; i++) {
         kprintf("in loop, on round %d. type = %d\n", i, program_header->p_type); 
@@ -105,16 +108,16 @@ void exec_setup(struct stivale2_struct* hdr) {
             kprintf("got into if\n"); 
 
             // vm_map for the entry - init set as non-executable
-            bool ret = vm_map(read_cr3(), program_header->p_vaddr, true, true, false); 
+            bool ret = vm_map(cr3, program_header->p_vaddr, true, true, false); 
             if (ret) {kprintf("vm mapped for section %d out of %d...\n", i, header->e_phnum); }
 
             // memcpy data into the virtual address
             k_memcpy(program_header + program_header->p_offset, (uintptr_t*)(program_header->p_vaddr), program_header->p_memsz); 
 
-            // get flags
+            // get flags, writable = 0x2, executable = 
             bool writable = false, executable = false; 
-            if((program_header->p_flags & 0x00000001) > 0) { executable = true; }
-            if((program_header->p_flags & 0x00000010) > 0) { writable = true; }
+            if((program_header->p_flags & X) > 0) { executable = true; }
+            if((program_header->p_flags & W) > 0) { writable = true; }
 
             // update permissions -- always set usable to be true
             vm_protect(read_cr3(), program_header->p_vaddr, true, writable, executable); 
@@ -129,7 +132,7 @@ void exec_setup(struct stivale2_struct* hdr) {
 
     entry_fn_ptr_t entry = (entry_fn_ptr_t)header->e_entry; 
     kprintf("got to end\n"); 
-    //entry(); 
+    //entry(); -- this is a page fault currently
 }
 
 // void find_modules(struct stivale2_struct* hdr) {

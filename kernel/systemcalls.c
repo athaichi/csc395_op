@@ -94,7 +94,7 @@ char getkey(uint8_t code) {
 
 char* kstrcat(char* dest, const char* src, int len) {
   int oglen = kstrlen(dest); 
-  char buf[oglen+len]; 
+  char buf[oglen+len+1]; // +1 for null terminator 
 
   // move over given from src
   for (int i = 0; i < oglen; i++) {
@@ -107,6 +107,9 @@ char* kstrcat(char* dest, const char* src, int len) {
     buf[oglen+i] = *src; 
     src++; 
   }
+
+  // add null terminator
+  buf[oglen+len+1] = '\0';
 
   char* returned = buf; 
   return returned; 
