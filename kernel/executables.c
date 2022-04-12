@@ -93,7 +93,7 @@ void exec_setup(struct stivale2_struct* hdr) {
     elf_hdr_t* header = (elf_hdr_t*)(ourmod.begin); 
 
     // locate the program header table
-    elf_phdr_t* program_header = (elf_phdr_t*)(header + header->e_phoff); 
+    elf_phdr_t* ph_entry = (elf_phdr_t*)(header + header->e_phoff); 
     kprintf("got to the header...\n"); 
 
     // get physical address
@@ -101,30 +101,30 @@ void exec_setup(struct stivale2_struct* hdr) {
 
     // loop over the entries 
     for (uint16_t i = 0; i < header->e_phnum; i++) {
-        kprintf("in loop, on round %d. type = %d\n", i, program_header->p_type); 
+        kprintf("in loop, on round %d. type = %d\n", i, ph_entry->p_type); 
 
         // if entry has type LOAD and size > 0
-        if ((program_header->p_type == LOAD) && (program_header->p_filesz > 0)) {
+        if ((ph_entry->p_type == LOAD) && (ph_entry->p_filesz > 0)) {
             kprintf("got into if\n"); 
 
             // vm_map for the entry - init set as non-executable
-            bool ret = vm_map(cr3, program_header->p_vaddr, true, true, false); 
+            bool ret = vm_map(cr3, ph_entry->p_vaddr, true, true, false); 
             if (ret) {kprintf("vm mapped for section %d out of %d...\n", i, header->e_phnum); }
 
             // memcpy data into the virtual address
-            k_memcpy(program_header + program_header->p_offset, (uintptr_t*)(program_header->p_vaddr), program_header->p_memsz); 
+            k_memcpy(ph_entry + ph_entry->p_offset, (uintptr_t*)(ph_entry->p_vaddr), ph_entry->p_memsz); 
 
             // get flags, writable = 0x2, executable = 0x1
             bool writable = false, executable = false; 
-            if((program_header->p_flags & X) > 0) { executable = true; }
-            if((program_header->p_flags & W) > 0) { writable = true; }
+            if((ph_entry->p_flags & X) > 0) { executable = true; }
+            if((ph_entry->p_flags & W) > 0) { writable = true; }
 
             // update permissions -- always set usable to be true
-            vm_protect(read_cr3(), program_header->p_vaddr, true, writable, executable); 
+            vm_protect(read_cr3(), ph_entry->p_vaddr, true, writable, executable); 
         }
 
         // move to next program header entry
-        program_header += (uint64_t)(sizeof(program_header)); 
+        ph_entry += (uint64_t)(sizeof(ph_entry)); 
     }
     
     // cast entry point to a function pointer and run!
