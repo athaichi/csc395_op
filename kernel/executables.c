@@ -100,7 +100,7 @@ void exec_setup(struct stivale2_struct* hdr) {
     uintptr_t cr3 = read_cr3() & 0xFFFFFFFFFFFFF000;
 
     // loop over the entries 
-    for (int i = 0; i < header->e_phnum; i++) {
+    for (uint16_t i = 0; i < header->e_phnum; i++) {
         kprintf("in loop, on round %d. type = %d\n", i, program_header->p_type); 
 
         // if entry has type LOAD and size > 0
@@ -114,7 +114,7 @@ void exec_setup(struct stivale2_struct* hdr) {
             // memcpy data into the virtual address
             k_memcpy(program_header + program_header->p_offset, (uintptr_t*)(program_header->p_vaddr), program_header->p_memsz); 
 
-            // get flags, writable = 0x2, executable = 
+            // get flags, writable = 0x2, executable = 0x1
             bool writable = false, executable = false; 
             if((program_header->p_flags & X) > 0) { executable = true; }
             if((program_header->p_flags & W) > 0) { writable = true; }
@@ -124,7 +124,7 @@ void exec_setup(struct stivale2_struct* hdr) {
         }
 
         // move to next program header entry
-        program_header += sizeof(program_header); 
+        program_header += (uint64_t)(sizeof(program_header)); 
     }
     
     // cast entry point to a function pointer and run!
