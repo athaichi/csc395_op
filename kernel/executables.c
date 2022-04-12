@@ -72,12 +72,15 @@ typedef struct elf_phdr {
 // ---------------------------------------------------------------
 
 // implementation from https://www.geeksforgeeks.org/write-memcpy/ 
-void k_memcpy (void* src, void* dest, uint64_t size) {
+void k_memcpy (void* src, void* dest, size_t size) {
     char* csrc = (char*)src; 
     char* cdest = (char*)dest; 
 
+    // copy byte by byte
     for (int i = 0; i < size; i++) {
-        cdest[i] = csrc[i]; 
+        kprintf("copying from src to dest...");
+        *(cdest++) = *(csrc++);  
+        kprintf("copied!\n");
     }
 }
 

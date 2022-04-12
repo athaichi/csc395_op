@@ -6,7 +6,7 @@
 
 // typedef void (*term_write_t)(const char*, size_t);
 // extern term_write_t term_write;
-extern term_putchar(char c); 
+extern void term_putchar(char c); 
 
 // credit: https://stackoverflow.com/questions/3213827/how-to-iterate-over-a-string-in-c 
 uint64_t kstrlen(const char* str) {
@@ -24,7 +24,7 @@ void kprint_c(char c) {
 
 void kprint_s(const char* str) {
   uint64_t len = kstrlen(str);
-  for (int i = 0; i < len; i++) { term_putchar(str); str++; }
+  for (int i = 0; i < len; i++) { term_putchar(*str); str++; }
 }
 
 void kprint_d(uint64_t value){
