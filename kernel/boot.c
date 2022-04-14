@@ -12,7 +12,7 @@
 #include "port.h"
 #include "systemcalls.h"
 #include "executables.h"
-#include "../usermode/gdt.h"
+//#include "../usermode/gdt.h"
 
 
 
