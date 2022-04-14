@@ -12,6 +12,7 @@
 #include "port.h"
 #include "systemcalls.h"
 #include "executables.h"
+#include "../usermode/gdt.h"
 
 
 
@@ -267,6 +268,8 @@ void _start(struct stivale2_struct* hdr) {
   // We've booted! Let's start processing tags passed to use from the bootloader
   init_init(hdr); 
   term_init();
+  //term_setup(hdr);
+  gdt_setup(); 
   idt_setup(); 
 
   // Keyboard stuff
