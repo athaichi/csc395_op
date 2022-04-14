@@ -45,12 +45,12 @@ void idt_set_handler(uint8_t index, void* fn, uint8_t type) {
     uint32_t offset2 = (function >> 32) & 0xFFFFFFFF;
 
     idt[index].offset_0 = offset0; 
-    idt[index].selector = IDT_CODE_SELECTOR;  
+    idt[index].selector = 0x28;  // run in kernel mode, set to KERNEL_CODE_SELECT for user mode 
     idt[index].ist = 0;        // aren't using an interrupt stack table, so just pass 0
     idt[index]._unused_0 = 0; 
     idt[index].type = type;    // using the parameter passed to this function
     idt[index]._unused_1 = 0;  
-    idt[index].dpl = 0;        // run the handler in kernel mode
+    idt[index].dpl = 0;        // run the handler in kernel mode, change to 3 for user mode
     idt[index].present = 1;    // the entry is present 
     idt[index].offset_1 = offset1; 
     idt[index].offset_2 = offset2;  
