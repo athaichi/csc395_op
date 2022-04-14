@@ -64,7 +64,7 @@ _Functions_
 - `void usable_memory(struct stivale2_struct* hdr)`: prints all usable memory to the terminal
     - First interval is the range of physical memory, second interval is the correspondingly mapped virtual memory 
 - `void* find_tag(struct stivale2_struct* hdr, uint64_t id)`: return an array of entries in the `hdr` that have a given tag 
-- `void k_memset(void *arr, uint32_t c, size_t len)`: sets an area of memory to a single value `c`
+- `void memset(void *arr, uint32_t c, size_t len)`: sets an area of memory to a single value `c`
 
 page.h
 ------
