@@ -32,6 +32,10 @@ uintptr_t read_cr3() {
   return value;
 }
 
+void write_cr3(uint64_t value) {
+  __asm__("mov %0, %%cr3" : : "r" (value));
+}
+
 // create a helper to get physical to virtual 
 uintptr_t get_hhdm(struct stivale2_struct* hdr) {
   struct stivale2_struct_tag_hhdm* hhdm = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
@@ -222,7 +226,7 @@ void mem_init(struct stivale2_struct* hdr) {
   }
 
   // unmap the lower half of the address space, using cr3 register as root address
-  unmap_lower_half(read_cr3()); 
+  //unmap_lower_half(read_cr3()); 
 
   kprintf("number of free pages are: %d", free_page_counter); 
 }
@@ -301,7 +305,7 @@ bool vm_map(uintptr_t root, uintptr_t address, bool usable, bool writable, bool 
         table[index].writable = writable; 
 
         // update tlb
-        invalidate_tlb(address);
+        //invalidate_tlb(address);
 
         // whoohooo! we did it, exit pls
         return true; 
@@ -363,7 +367,7 @@ bool vm_unmap(uintptr_t root, uintptr_t address) {
         table[index].present = false; 
 
         // update tlb
-        invalidate_tlb(address);
+        //invalidate_tlb(address);
 
         // we're done!
         return true; 
@@ -424,7 +428,7 @@ bool vm_protect(uintptr_t root, uintptr_t address, bool user, bool writable, boo
         table[index].writable = writable; 
 
         // update tlb
-        invalidate_tlb(address);
+        //invalidate_tlb(address);
 
         // we've finished successfully!
         return true; 
@@ -447,7 +451,7 @@ bool vm_protect(uintptr_t root, uintptr_t address, bool user, bool writable, boo
 }
 
 // Unmap everything in the lower half of an address space with level 4 page table at address root
-void unmap_lower_half(uintptr_t root)
+void unmap_lower_half(uintptr_t root) {
   // We can reclaim memory used to hold page tables, but NOT the mapped pages
   pt_entry_t* l4_table = ptov(root);
   for (size_t l4_index = 0; l4_index < 256; l4_index++) {

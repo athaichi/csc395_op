@@ -196,7 +196,7 @@ void handler20(interrupt_context_t* ctx, uint64_t ec) {
  */
 void idt_setup() {
   // Step 1: Zero out the IDT, probably using memset (which you'll have to implement)
-  k_memset(idt, 0, sizeof(idt)); 
+  memset(idt, 0, sizeof(idt)); 
 
   // -----------------------------------------------
 

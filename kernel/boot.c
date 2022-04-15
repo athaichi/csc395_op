@@ -269,7 +269,7 @@ void _start(struct stivale2_struct* hdr) {
   init_init(hdr); 
   term_init();
   //term_setup(hdr);
-  gdt_setup(); 
+  //gdt_setup(); 
   idt_setup(); 
   mem_init(hdr); 
 
@@ -288,6 +288,7 @@ void _start(struct stivale2_struct* hdr) {
 
   //all_tests(); 
 
+  
   // get modules
   // kprint_s("Modules: \n"); 
   // find_modules(hdr); 
