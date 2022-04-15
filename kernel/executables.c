@@ -72,12 +72,14 @@ typedef struct elf_phdr {
 // ---------------------------------------------------------------
 
 // implementation from https://www.geeksforgeeks.org/write-memcpy/ 
-void k_memcpy (void* src, void* dest, uint64_t size) {
+void k_memcpy (void* dest, void* src, uint64_t size) {
     char* csrc = (char*)src; 
     char* cdest = (char*)dest; 
 
     for (int i = 0; i < size; i++) {
-        cdest[i] = csrc[i]; 
+        //kprintf("copying from src to dest...");
+        *(cdest++) = *(csrc++);  
+        //kprintf("copied!\n"); 
     }
 }
 
@@ -93,7 +95,7 @@ void exec_setup(struct stivale2_struct* hdr) {
     elf_hdr_t* header = (elf_hdr_t*)(ourmod.begin); 
 
     // locate the program header table
-    elf_phdr_t* ph_entry = (elf_phdr_t*)(header + header->e_phoff); 
+    elf_phdr_t* ph_entry = (elf_phdr_t*)((uintptr_t)header + header->e_phoff); 
     kprintf("got to the header...\n"); 
 
     // get physical address
@@ -112,7 +114,8 @@ void exec_setup(struct stivale2_struct* hdr) {
             if (ret) {kprintf("vm mapped for section %d out of %d...\n", i, header->e_phnum); }
 
             // memcpy data into the virtual address
-            k_memcpy(ph_entry + ph_entry->p_offset, (uintptr_t*)(ph_entry->p_vaddr), ph_entry->p_memsz); 
+            // if file size is 0 use filesz otherwise use memsz
+            k_memcpy((uintptr_t*)(ph_entry->p_vaddr), (uintptr_t)header + ph_entry->p_offset,  ph_entry->p_memsz); 
 
             // get flags, writable = 0x2, executable = 0x1
             bool writable = false, executable = false; 
@@ -124,7 +127,7 @@ void exec_setup(struct stivale2_struct* hdr) {
         }
 
         // move to next program header entry
-        ph_entry += (uint64_t)(sizeof(ph_entry)); 
+        ph_entry++; 
     }
     
     // cast entry point to a function pointer and run!
@@ -132,7 +135,7 @@ void exec_setup(struct stivale2_struct* hdr) {
 
     entry_fn_ptr_t entry = (entry_fn_ptr_t)header->e_entry; 
     kprintf("got to end\n"); 
-    //entry(); -- this is a page fault currently
+    entry();
 }
 
 // void find_modules(struct stivale2_struct* hdr) {
