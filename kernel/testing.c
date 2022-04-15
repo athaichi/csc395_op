@@ -157,6 +157,40 @@
   //   kprintf("%c", kgetc()); 
   // }
 
+  // // // test write
+  // char buf2[6] = "olleh"; 
+  // long rc2 = syscall(SYS_WRITE, 1, buf2, 6); 
+  // if (rc2 < 0) {
+  //   kprintf("write failed\n"); 
+  // } else {
+  //   buf2[rc2] = '\0';
+  //   kprintf("wrote '%s'\n", buf2); 
+  // }
+
+  // // test read
+  // char buf[6];
+  // long rc = syscall(SYS_READ, 0, buf, 5);
+  // if (rc < 0) {
+  //   kprintf("read failed\n");
+  // } else {
+  //   buf[rc] = '\0';
+  //   kprintf("read '%s', and rc: %d\n", buf, rc);
+  // }
+
+
+  // test strcat and memcpy
+  // char* test = "taco";
+  // char* new = NULL;  
+  // char copy[5]; 
+  // char c = 's'; 
+  // //new = kstrcat(test, &c, 1); 
+  // //kprintf("%s", new); 
+  // k_memcpy(copy, test, 5); 
+  // kprintf("%s", copy); 
+
+  //test exec_setup()
+  //exec_setup(hdr);
+
 void all_tests() {
     kprint_tests(); 
 }

@@ -271,6 +271,7 @@ void _start(struct stivale2_struct* hdr) {
   //term_setup(hdr);
   gdt_setup(); 
   idt_setup(); 
+  mem_init(hdr); 
 
   // Keyboard stuff
   pic_init(); 
@@ -286,39 +287,6 @@ void _start(struct stivale2_struct* hdr) {
   kprintf("Hello Kernel!\n"); //term_write("Hello Kernel!\n", 14);
 
   //all_tests(); 
-
- // test read
-  // char buf[6];
-  // long rc = syscall(SYS_READ, 0, buf, 5);
-  // if (rc < 0) {
-  //   kprintf("read failed\n");
-  // } else {
-  //   buf[rc] = '\0';
-  //   kprintf("read '%s'\n", buf);
-  // }
-
-  //exec_setup(hdr); 
-
-
-  char* test = "taco";
-  char* new = NULL;  
-  char* copy; 
-  char c = 's'; 
-  //new = kstrcat(test, &c, 1); 
-  //kprintf("%s", new); 
-  k_memcpy(test, copy, 5); 
-  kprintf("%s", copy); 
-
-  // // // test write
-  // char buf2[6] = "olleh"; 
-  // long rc2 = syscall(SYS_WRITE, 1, buf2, 6); 
-  // if (rc2 < 0) {
-  //   kprintf("write failed\n"); 
-  // } else {
-  //   rc2 = syscall(SYS_READ, 0, buf2, 5); 
-  //   buf2[rc2] = '\0';
-  //   kprintf("wrote '%s'\n", buf2); 
-  // }
 
   // get modules
   // kprint_s("Modules: \n"); 

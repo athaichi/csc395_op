@@ -117,7 +117,7 @@ char* kstrcat(char* dest, const char* src, int len) {
 
 // system call read() function 
 // fix this to handle backspace
-void read(uint64_t buf, uint64_t numchars) {
+int read(uint64_t buf, uint64_t numchars) {
   // create a new buffer
   char* buff = (char*)buf;   
 
@@ -125,14 +125,16 @@ void read(uint64_t buf, uint64_t numchars) {
   for (int i = 0; i < numchars; i++) {
     char ret = kgetc(); 
     //strcat(char*dest, const char c, size_t len) 
-    kstrcat(buff, &ret, 1); 
+    //kstrcat(buff, &ret, 1); 
+    buff[i] = ret;
+    kprintf("%c", ret); 
   }
 
   // set up to return 
-  buf = (uint64_t)buff; 
+  return numchars; 
 }
 
-void write(uint64_t buf, uint64_t len) {
+int write(uint64_t buf, uint64_t len) {
   // turn buffer into a string
   char* wbuffer = (char*)buf; 
 
@@ -141,9 +143,16 @@ void write(uint64_t buf, uint64_t len) {
     kprint_c(*wbuffer); 
     wbuffer++; 
   }
+
+  return len; 
 }
 
 void char_write(char key) {
+  if (key == '\0') {
+    return; 
+  }
+
+  kprintf("%c", key); 
   // add it to the buffer
   buffer[writing_index] = key; 
   writing_index++; 
@@ -180,8 +189,8 @@ char kgetc() {
     reading_index = 0; 
   } 
 
-  // check to see if it's actually useful
-  if (returned == '\0') { kgetc(); }
+  // // check to see if it's actually useful
+  // if (returned == '\0') { kgetc(); }
 
   //kprintf("interrput has happened and we're back in kgetc()...")
   //kprintf("about to hit the return\n");
@@ -194,10 +203,10 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2
   kprintf("syscall %d: %d, %d, %d, %d, %d, %d\n", nr, arg0, arg1, arg2, arg3, arg4, arg5);
   
   // if we are reading, call the read function
-  if (nr == SYS_READ) {read(arg1, arg2); return arg2; }
+  if (nr == SYS_READ) {int rlen = read(arg1, arg2); return rlen; }
 
   // if we are writing, call the write function
-  if (nr == SYS_WRITE) {write(arg1, arg2); return arg2; }
+  if (nr == SYS_WRITE) {int wlen = write(arg1, arg2); return wlen; }
 
   // file descriptor is not allowed
   return -1;
