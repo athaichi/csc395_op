@@ -133,12 +133,6 @@ void _start(struct stivale2_struct* hdr) {
 
   //all_tests(); 
 
-
-   
-
-
-
-
   // get modules
   // kprint_s("Modules: \n"); 
   // find_modules(hdr); 
