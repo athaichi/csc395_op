@@ -200,7 +200,7 @@ char kgetc() {
 
 // SYSCALL STUFF:
 int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
-  kprintf("syscall %d: %d, %d, %d, %d, %d, %d\n", nr, arg0, arg1, arg2, arg3, arg4, arg5);
+  //kprintf("syscall %d: %d, %d, %d, %d, %d, %d\n", nr, arg0, arg1, arg2, arg3, arg4, arg5);
   
   // if we are reading, call the read function
   if (nr == SYS_READ) {int rlen = read(arg1, arg2); return rlen; }

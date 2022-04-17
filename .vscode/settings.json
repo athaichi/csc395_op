@@ -6,6 +6,8 @@
     "*.t": "ignore",
     "stdint.h": "c",
     "stivale2.h": "c",
-    "stddef.h": "c"
+    "stddef.h": "c",
+    "systemcalls.h": "c",
+    "executables.h": "c"
   }
 }

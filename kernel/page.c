@@ -13,9 +13,15 @@
 typedef struct page_table_entry {
   bool present : 1;
   bool writable : 1;
-  bool user : 1;      // also known as usable
-  uint16_t unused : 9;
-  uint64_t address : 51;
+  bool user : 1;
+  bool write_through : 1;
+  bool cache_disable : 1;
+  bool accessed : 1;
+  bool dirty : 1;
+  bool page_size : 1;
+  uint8_t _unused0 : 4;
+  uintptr_t address : 40;
+  uint16_t _unused1 : 11;
   bool no_execute : 1;
 } __attribute__((packed)) pt_entry_t;
 
@@ -24,6 +30,10 @@ uintptr_t read_cr3() {
   uintptr_t value;
   __asm__("mov %%cr3, %0" : "=r" (value));
   return value;
+}
+
+void write_cr3(uint64_t value) {
+  __asm__("mov %0, %%cr3" : : "r" (value));
 }
 
 // create a helper to get physical to virtual 
@@ -102,14 +112,21 @@ void translate(void* address, struct stivale2_struct* hdr) {
   return; 
 }
 
+
+
 // ===============================================
 // ===============================================
 
 // NOTE TO SELF: virtual address = physical address + hhdm address
 //               physical address = virtual address - hhdm address
 
-// global! gets set in mem_init
-uintptr_t hhdm_base = 0; 
+// global! gets set in init_init (in boot)
+extern uintptr_t hhdm_base; 
+
+void* ptov (uint64_t paddr) {
+  uintptr_t vaddr = (uintptr_t)(paddr + hhdm_base); 
+  return (void*)vaddr; 
+}
 
 // global! keep track of number of free pages - just for testing purposes
 int free_page_counter = 0;
@@ -174,6 +191,51 @@ void pmem_free(uintptr_t p) {
 
 }
 
+// Unmap everything in the lower half of an address space with level 4 page table at address root
+void unmap_lower_half(uintptr_t root) {
+  // We can reclaim memory used to hold page tables, but NOT the mapped pages
+  pt_entry_t* l4_table = ptov(root);
+  for (size_t l4_index = 0; l4_index < 256; l4_index++) {
+
+    // Does this entry point to a level 3 table?
+    if (l4_table[l4_index].present) {
+
+      // Yes. Mark the entry as not present in the level 4 table
+      l4_table[l4_index].present = false;
+
+      // Now loop over the level 3 table
+      pt_entry_t* l3_table = ptov(l4_table[l4_index].address << 12);
+      for (size_t l3_index = 0; l3_index < 512; l3_index++) {
+
+        // Does this entry point to a level 2 table?
+        if (l3_table[l3_index].present && !l3_table[l3_index].page_size) {
+
+          // Yes. Loop over the level 2 table
+          pt_entry_t* l2_table = ptov(l3_table[l3_index].address << 12);
+          for (size_t l2_index = 0; l2_index < 512; l2_index++) {
+
+            // Does this entry point to a level 1 table?
+            if (l2_table[l2_index].present && !l2_table[l2_index].page_size) {
+
+              // Yes. Free the physical page the holds the level 1 table
+              pmem_free(l2_table[l2_index].address << 12);
+            }
+          }
+
+          // Free the physical page that held the level 2 table
+          pmem_free(l3_table[l3_index].address << 12);
+        }
+      }
+
+      // Free the physical page that held the level 3 table
+      pmem_free(l4_table[l4_index].address << 12);
+    }
+  }
+
+  // Reload CR3 to flush any cached address translations
+  write_cr3(read_cr3());
+}
+
 
 // this does a whole bunch of useful init stuff: 
 /*
@@ -195,7 +257,7 @@ void mem_init(struct stivale2_struct* hdr) {
     //if((cur.type == 1) || (cur.type == 0x1000)) { 
     if (cur.type == 1) {
       // add it to the freelist
-      kprintf("found an entry\n");
+      //kprintf("found an entry\n");
       uint64_t curr, end = 0; 
       curr = cur.base;
       end = cur.base + cur.length; 
@@ -210,7 +272,15 @@ void mem_init(struct stivale2_struct* hdr) {
     }
   }
 
-  kprintf("number of free pages are: %d", free_page_counter); 
+  // unmap the lower half of the address space, using cr3 register as root address
+  unmap_lower_half(read_cr3()); 
+
+  kprintf("number of free pages are: %d\n", free_page_counter); 
+}
+
+// makes the TLB ignore old addresses you used to have
+void invalidate_tlb(uintptr_t virtual_address) {
+   __asm__("invlpg (%0)" :: "r" (virtual_address) : "memory");
 }
 
 /**
@@ -268,7 +338,7 @@ bool vm_map(uintptr_t root, uintptr_t address, bool usable, bool writable, bool 
       pt_entry_t * new_table = (pt_entry_t*)(new_table_phys + hhdm_base); 
 
       // zero it out
-      k_memset(new_table, 0, 0x1000);
+      kmemset(new_table, 0, 0x1000);
 
       // update previous table to have the newly allocated table
       table[index].present = 1; 
@@ -280,6 +350,9 @@ bool vm_map(uintptr_t root, uintptr_t address, bool usable, bool writable, bool 
         table[index].no_execute = !executable;
         table[index].user = usable;
         table[index].writable = writable; 
+
+        // update tlb
+        invalidate_tlb(address);
 
         // whoohooo! we did it, exit pls
         return true; 
@@ -340,6 +413,9 @@ bool vm_unmap(uintptr_t root, uintptr_t address) {
         // page is no longer accessible in table
         table[index].present = false; 
 
+        // update tlb
+        invalidate_tlb(address);
+
         // we're done!
         return true; 
       }
@@ -398,6 +474,9 @@ bool vm_protect(uintptr_t root, uintptr_t address, bool user, bool writable, boo
         table[index].user = user; 
         table[index].writable = writable; 
 
+        // update tlb
+        invalidate_tlb(address);
+
         // we've finished successfully!
         return true; 
       }
@@ -417,3 +496,4 @@ bool vm_protect(uintptr_t root, uintptr_t address, bool user, bool writable, boo
   kprintf("(vm_protect) idk how you've got here but you're not supposed to be here\n"); 
   return false; 
 }
+

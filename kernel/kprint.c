@@ -4,8 +4,9 @@
 
 #include "kprint.h"
 
-typedef void (*term_write_t)(const char*, size_t);
-extern term_write_t term_write;
+// typedef void (*term_write_t)(const char*, size_t);
+// extern term_write_t term_write;
+extern void term_putchar(char c); 
 
 // credit: https://stackoverflow.com/questions/3213827/how-to-iterate-over-a-string-in-c 
 uint64_t kstrlen(const char* str) {
@@ -18,12 +19,12 @@ uint64_t kstrlen(const char* str) {
 }
 
 void kprint_c(char c) {
-  term_write(&c, 1);
+  term_putchar(c); 
 }
 
 void kprint_s(const char* str) {
   uint64_t len = kstrlen(str);
-  term_write(str, len);
+  for (int i = 0; i < len; i++) { term_putchar(*str); str++; }
 }
 
 void kprint_d(uint64_t value){
