@@ -112,6 +112,8 @@ void translate(void* address, struct stivale2_struct* hdr) {
   return; 
 }
 
+
+
 // ===============================================
 // ===============================================
 
@@ -189,6 +191,51 @@ void pmem_free(uintptr_t p) {
 
 }
 
+// Unmap everything in the lower half of an address space with level 4 page table at address root
+void unmap_lower_half(uintptr_t root) {
+  // We can reclaim memory used to hold page tables, but NOT the mapped pages
+  pt_entry_t* l4_table = ptov(root);
+  for (size_t l4_index = 0; l4_index < 256; l4_index++) {
+
+    // Does this entry point to a level 3 table?
+    if (l4_table[l4_index].present) {
+
+      // Yes. Mark the entry as not present in the level 4 table
+      l4_table[l4_index].present = false;
+
+      // Now loop over the level 3 table
+      pt_entry_t* l3_table = ptov(l4_table[l4_index].address << 12);
+      for (size_t l3_index = 0; l3_index < 512; l3_index++) {
+
+        // Does this entry point to a level 2 table?
+        if (l3_table[l3_index].present && !l3_table[l3_index].page_size) {
+
+          // Yes. Loop over the level 2 table
+          pt_entry_t* l2_table = ptov(l3_table[l3_index].address << 12);
+          for (size_t l2_index = 0; l2_index < 512; l2_index++) {
+
+            // Does this entry point to a level 1 table?
+            if (l2_table[l2_index].present && !l2_table[l2_index].page_size) {
+
+              // Yes. Free the physical page the holds the level 1 table
+              pmem_free(l2_table[l2_index].address << 12);
+            }
+          }
+
+          // Free the physical page that held the level 2 table
+          pmem_free(l3_table[l3_index].address << 12);
+        }
+      }
+
+      // Free the physical page that held the level 3 table
+      pmem_free(l4_table[l4_index].address << 12);
+    }
+  }
+
+  // Reload CR3 to flush any cached address translations
+  write_cr3(read_cr3());
+}
+
 
 // this does a whole bunch of useful init stuff: 
 /*
@@ -226,7 +273,7 @@ void mem_init(struct stivale2_struct* hdr) {
   }
 
   // unmap the lower half of the address space, using cr3 register as root address
-  //unmap_lower_half(read_cr3()); 
+  unmap_lower_half(read_cr3()); 
 
   kprintf("number of free pages are: %d\n", free_page_counter); 
 }
@@ -305,7 +352,7 @@ bool vm_map(uintptr_t root, uintptr_t address, bool usable, bool writable, bool 
         table[index].writable = writable; 
 
         // update tlb
-        //invalidate_tlb(address);
+        invalidate_tlb(address);
 
         // whoohooo! we did it, exit pls
         return true; 
@@ -367,7 +414,7 @@ bool vm_unmap(uintptr_t root, uintptr_t address) {
         table[index].present = false; 
 
         // update tlb
-        //invalidate_tlb(address);
+        invalidate_tlb(address);
 
         // we're done!
         return true; 
@@ -428,7 +475,7 @@ bool vm_protect(uintptr_t root, uintptr_t address, bool user, bool writable, boo
         table[index].writable = writable; 
 
         // update tlb
-        //invalidate_tlb(address);
+        invalidate_tlb(address);
 
         // we've finished successfully!
         return true; 
@@ -450,47 +497,3 @@ bool vm_protect(uintptr_t root, uintptr_t address, bool user, bool writable, boo
   return false; 
 }
 
-// Unmap everything in the lower half of an address space with level 4 page table at address root
-void unmap_lower_half(uintptr_t root) {
-  // We can reclaim memory used to hold page tables, but NOT the mapped pages
-  pt_entry_t* l4_table = ptov(root);
-  for (size_t l4_index = 0; l4_index < 256; l4_index++) {
-
-    // Does this entry point to a level 3 table?
-    if (l4_table[l4_index].present) {
-
-      // Yes. Mark the entry as not present in the level 4 table
-      l4_table[l4_index].present = false;
-
-      // Now loop over the level 3 table
-      pt_entry_t* l3_table = ptov(l4_table[l4_index].address << 12);
-      for (size_t l3_index = 0; l3_index < 512; l3_index++) {
-
-        // Does this entry point to a level 2 table?
-        if (l3_table[l3_index].present && !l3_table[l3_index].page_size) {
-
-          // Yes. Loop over the level 2 table
-          pt_entry_t* l2_table = ptov(l3_table[l3_index].address << 12);
-          for (size_t l2_index = 0; l2_index < 512; l2_index++) {
-
-            // Does this entry point to a level 1 table?
-            if (l2_table[l2_index].present && !l2_table[l2_index].page_size) {
-
-              // Yes. Free the physical page the holds the level 1 table
-              pmem_free(l2_table[l2_index].address << 12);
-            }
-          }
-
-          // Free the physical page that held the level 2 table
-          pmem_free(l3_table[l3_index].address << 12);
-        }
-      }
-
-      // Free the physical page that held the level 3 table
-      pmem_free(l4_table[l4_index].address << 12);
-    }
-  }
-
-  // Reload CR3 to flush any cached address translations
-  write_cr3(read_cr3());
-}
