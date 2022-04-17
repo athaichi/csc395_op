@@ -16,10 +16,10 @@ void _start() {
   test_page[3] = 'l';
   test_page[4] = 'o';
   test_page[5] = '\n';
-  //syscall(SYS_write, 1, test_page, 6);
+  syscall(SYS_write, 1, test_page, 6);
 
   // Issue a write system call
-  syscall(SYS_write, 1, "Hello world!\n", 13);
+  //syscall(SYS_write, 1, "Hello world!\n", 13);
 
   
 

@@ -297,8 +297,6 @@ void _start(struct stivale2_struct* hdr) {
 
   //all_tests(); 
 
-<<<<<<< HEAD
-=======
 //   // Pick an arbitrary location and size for the user-mode stack
 // uintptr_t user_stack = 0x70000000000;
 // size_t user_stack_size = 8 * PAGESIZE;
@@ -318,12 +316,11 @@ void _start(struct stivale2_struct* hdr) {
 
   // test to see if we can get access pages in usermode
   uintptr_t test_page = 0x400000000;
-  bool ret = vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, true, true, false);
+  bool ret = vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, false, true, false);
   if (ret) { exec_setup(hdr); }
-  else {kprintf("failed to vm_map\n"); }
+  else { kprintf("failed to vm_map\n"); }
   
 
->>>>>>> 78347bb679684b505e90f7a90b3f96f5d950ef94
   // get modules
   // kprint_s("Modules: \n"); 
   // find_modules(hdr); 
