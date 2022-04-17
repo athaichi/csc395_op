@@ -1,10 +1,10 @@
 #include "gdt.h"
-#include "../kernel/memory.h"
+#include "memory.h"
 
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
-#include <string.h>
+//#include <string.h>
 
 #define MAX_GDT_SIZE 256
 
@@ -31,7 +31,7 @@ void gdt_code_descriptor(uint16_t offset, bool user) {
   }
 
   // Zero out the descriptor
-  memset(d, 0, sizeof(seg_descriptor_t));
+  kmemset(d, 0, sizeof(seg_descriptor_t));
 
   // Fill in the type and flags fields
   d->access = 0x9A | (user ? 0x60 : 0);
@@ -47,7 +47,7 @@ void gdt_data_descriptor(uint16_t offset, bool user) {
   }
 
   // Zero out the descriptor
-  memset(d, 0, sizeof(seg_descriptor_t));
+  kmemset(d, 0, sizeof(seg_descriptor_t));
 
   // Fill in the type field
   d->access = 0x92 | (user ? 0x60 : 0);
@@ -94,7 +94,7 @@ void gdt_tss_descriptor(uint16_t offset, tss_t* tss) {
   }
 
   // Zero out the descriptor
-  memset(d, 0, sizeof(sys_descriptor_t));
+  kmemset(d, 0, sizeof(sys_descriptor_t));
 
   // The base fields point to the TSS
   d->base_0 = (uintptr_t)tss;
@@ -118,7 +118,7 @@ uint8_t interrupt_stack[0x8000];
 
 void gdt_setup() {
   // Zero out the gdt
-  memset(gdt, 0, sizeof(gdt));
+  kmemset(gdt, 0, sizeof(gdt));
 
   // Create the kernel code and data descriptors
   gdt_code_descriptor(KERNEL_CODE_SELECTOR, false);
@@ -128,11 +128,18 @@ void gdt_setup() {
   gdt_code_descriptor(USER_CODE_SELECTOR, true);
   gdt_data_descriptor(USER_DATA_SELECTOR, true);
 
-  // NEW: create a TSS descriptor
-  gdt_tss_descriptor(TSS_SELECTOR, &tss);
+  // Create a TSS descriptor
+  gdt_tss_descriptor(TSS_SELECTOR, &tss); 
+
+  // Load the GDT
+  gdt_record_t record = {
+    .sz = gdt_size - 1,
+    .base = gdt
+  };
+  __asm__("lgdt %0" :: "m"(record));
 
   // Zero out the TSS
-  memset(&tss, 0, sizeof(tss));
+  kmemset(&tss, 0, sizeof(tss)); 
 
   // Interrupts delivered while in user mode should use this stack pointer
   tss.rsp0 = (uintptr_t)interrupt_stack + sizeof(interrupt_stack) - 8;

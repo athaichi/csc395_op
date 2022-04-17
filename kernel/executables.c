@@ -90,33 +90,33 @@ void exec_setup(struct stivale2_struct* hdr) {
     struct stivale2_struct_tag_modules* moduleslist = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
     struct stivale2_module ourmod = moduleslist->modules[0]; 
 
-    kprintf("got modules...\n"); 
+    //kprintf("got modules...\n"); 
 
     // cast it to an elf header 
     elf_hdr_t* header = (elf_hdr_t*)(ourmod.begin); 
 
     // locate the program header table
     elf_phdr_t* ph_entry = (elf_phdr_t*)((uintptr_t)header + header->e_phoff); 
-    kprintf("got to the header...\n"); 
+    //kprintf("got to the header...\n"); 
 
     // get physical address
     uintptr_t cr3 = read_cr3() & 0xFFFFFFFFFFFFF000;
 
     // loop over the entries 
     for (uint16_t i = 0; i < header->e_phnum; i++) {
-        kprintf("in loop, on round %d. type = %d\n", i, ph_entry->p_type); 
+        //kprintf("in loop, on round %d. type = %d\n", i, ph_entry->p_type); 
 
         // if entry has type LOAD and size > 0
         if ((ph_entry->p_type == LOAD) && (ph_entry->p_filesz > 0)) {
-            kprintf("got into if\n"); 
+            //kprintf("got into if\n"); 
 
             // vm_map for the entry - init set as non-executable
             bool ret = vm_map(cr3, ph_entry->p_vaddr, true, true, false); 
-            if (ret) {kprintf("vm mapped for section %d out of %d...\n", i, header->e_phnum); }
+            //if (ret) {kprintf("vm mapped for section %d out of %d...\n", i, header->e_phnum); }
 
             // memcpy data into the virtual address
             // if file size is 0 use filesz otherwise use memsz
-            k_memcpy((uintptr_t*)(ph_entry->p_vaddr), (uintptr_t)header + ph_entry->p_offset,  ph_entry->p_memsz); 
+            k_memcpy((uintptr_t*)(ph_entry->p_vaddr), (uintptr_t*)((uintptr_t)header + ph_entry->p_offset),  ph_entry->p_memsz); 
 
             // get flags, writable = 0x2, executable = 0x1
             bool writable = false, executable = false; 
@@ -135,7 +135,7 @@ void exec_setup(struct stivale2_struct* hdr) {
     typedef void (*entry_fn_ptr_t)(); 
 
     entry_fn_ptr_t entry = (entry_fn_ptr_t)header->e_entry; 
-    kprintf("got to end\n"); 
+    //kprintf("got to end\n"); 
     entry();
 }
 

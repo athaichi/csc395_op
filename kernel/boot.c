@@ -12,7 +12,15 @@
 #include "port.h"
 #include "systemcalls.h"
 #include "executables.h"
-//#include "../usermode/gdt.h"
+#include "gdt.h"
+
+// #define PAGESIZE 0x1000
+
+// extern int64_t KERNEL_CODE_SELECTOR;
+// extern int64_t KERNEL_DATA_SELECTOR;
+// extern int64_t USER_CODE_SELECTOR;
+// extern int64_t USER_DATA_SELECTOR;
+// extern int64_t TSS_SELECTOR; 
 
 
 
@@ -269,7 +277,7 @@ void _start(struct stivale2_struct* hdr) {
   init_init(hdr); 
   term_init();
   //term_setup(hdr);
-  //gdt_setup(); 
+  gdt_setup(); 
   idt_setup(); 
   mem_init(hdr); 
 
@@ -284,11 +292,35 @@ void _start(struct stivale2_struct* hdr) {
   idt_set_handler(IRQ1_INTERRUPT, keyboard_interrupt, IDT_TYPE_TRAP);
 
   // Print a greeting
-  kprintf("Hello Kernel!\n"); //term_write("Hello Kernel!\n", 14);
+  //kprintf("Hello Kernel!\n"); //term_write("Hello Kernel!\n", 14);
+  //term_putchar('h'); 
 
   //all_tests(); 
 
+//   // Pick an arbitrary location and size for the user-mode stack
+// uintptr_t user_stack = 0x70000000000;
+// size_t user_stack_size = 8 * PAGESIZE;
+
+// // Map the user-mode-stack
+// for(uintptr_t p = user_stack; p < user_stack + user_stack_size; p += 0x1000) {
+//   // Map a page that is user-accessible, writable, but not executable
+//   vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, p, true, true, false);
+// }
+
+// // And now jump to the entry point
+// usermode_entry(USER_DATA_SELECTOR | 0x3,            // User data selector with priv=3
+//                 user_stack + user_stack_size - 8,   // Stack starts at the high address minus 8 bytes
+//                 USER_CODE_SELECTOR | 0x3,           // User code selector with priv=3
+//                 header->entry);                     // Jump to the entry point specified in the ELF file
+
+
+  // test to see if we can get access pages in usermode
+  uintptr_t test_page = 0x400000000;
+  bool ret = vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, true, true, false);
+  if (ret) { exec_setup(hdr); }
+  else {kprintf("failed to vm_map\n"); }
   
+
   // get modules
   // kprint_s("Modules: \n"); 
   // find_modules(hdr); 

@@ -210,7 +210,7 @@ void mem_init(struct stivale2_struct* hdr) {
     //if((cur.type == 1) || (cur.type == 0x1000)) { 
     if (cur.type == 1) {
       // add it to the freelist
-      kprintf("found an entry\n");
+      //kprintf("found an entry\n");
       uint64_t curr, end = 0; 
       curr = cur.base;
       end = cur.base + cur.length; 
@@ -228,7 +228,7 @@ void mem_init(struct stivale2_struct* hdr) {
   // unmap the lower half of the address space, using cr3 register as root address
   //unmap_lower_half(read_cr3()); 
 
-  kprintf("number of free pages are: %d", free_page_counter); 
+  kprintf("number of free pages are: %d\n", free_page_counter); 
 }
 
 // makes the TLB ignore old addresses you used to have
@@ -291,7 +291,7 @@ bool vm_map(uintptr_t root, uintptr_t address, bool usable, bool writable, bool 
       pt_entry_t * new_table = (pt_entry_t*)(new_table_phys + hhdm_base); 
 
       // zero it out
-      memset(new_table, 0, 0x1000);
+      kmemset(new_table, 0, 0x1000);
 
       // update previous table to have the newly allocated table
       table[index].present = 1; 
