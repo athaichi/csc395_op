@@ -2,6 +2,8 @@
 #include <stddef.h>
 #include <stdarg.h>
 
+#include <memory.h>
+
 #include "kprint.h"
 #include "memory.h"
 #include "page.h"
@@ -70,19 +72,6 @@ typedef struct elf_phdr {
 } __attribute__((packed)) elf_phdr_t; 
 
 // ---------------------------------------------------------------
-
-// implementation from https://www.geeksforgeeks.org/write-memcpy/ 
-void k_memcpy (void* dest, void* src, uint64_t size) {
-    char* csrc = (char*)src; 
-    char* cdest = (char*)dest; 
-
-    // copy byte by byte
-    for (int i = 0; i < size; i++) {
-        //kprintf("copying from src to dest...");
-        *(cdest++) = *(csrc++);  
-        //kprintf("copied!\n"); 
-    }
-}
 
 
 void exec_setup(struct stivale2_struct* hdr) {

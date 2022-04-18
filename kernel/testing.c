@@ -1,7 +1,10 @@
-  #include <stdint.h>
-  #include "kprint.h"
+#include <stdint.h>
 
-  void kprint_tests() {
+#include <string.h>
+
+#include "kprint.h"
+
+void kprint_tests() {
 
   // test kprint_c
   char test = 'h';  

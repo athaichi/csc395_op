@@ -2,11 +2,12 @@
 #include <stddef.h>
 #include <stdarg.h>
 
+#include <memory.h>
+
 #include "stivale2.h"
 #include "util.h"
 #include "interrupts.h"
 #include "kprint.h"
-#include "memory.h"
 
 // Make an IDT
 idt_entry_t idt[256];

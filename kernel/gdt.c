@@ -1,9 +1,12 @@
-#include "gdt.h"
-#include "memory.h"
-
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+
+#include <memory.h>
+
+#include "gdt.h"
+
+
 //#include <string.h>
 
 #define MAX_GDT_SIZE 256
