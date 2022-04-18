@@ -171,7 +171,7 @@ void term_putchar(char c) {
   // Scroll if needed
   if (term_row == VGA_HEIGHT) {
     // Shift characters up a row
-    k_memcpy(term, &term[VGA_WIDTH], sizeof(vga_entry_t) * VGA_WIDTH * (VGA_HEIGHT - 1));
+    kmemcpy(term, &term[VGA_WIDTH], sizeof(vga_entry_t) * VGA_WIDTH * (VGA_HEIGHT - 1));
     term_row--;
     
     // Clear the last row
@@ -279,7 +279,6 @@ void _start(struct stivale2_struct* hdr) {
   // We've booted! Let's start processing tags passed to use from the bootloader
   init_init(hdr); 
   term_init();
-  //term_setup(hdr);
   gdt_setup(); 
   idt_setup(); 
   mem_init(hdr); 

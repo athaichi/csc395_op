@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include <stdarg.h>
+#include <stddef.h>
 
 // credit: https://aticleworld.com/memset-in-c/ 
 void kmemset(void *arr, uint32_t c, size_t len) {
@@ -12,7 +12,7 @@ void kmemset(void *arr, uint32_t c, size_t len) {
 }
 
 // implementation from https://www.geeksforgeeks.org/write-memcpy/ 
-void k_memcpy (void* dest, void* src, uint64_t size) {
+void kmemcpy (void* dest, void* src, uint64_t size) {
     char* csrc = (char*)src; 
     char* cdest = (char*)dest; 
 

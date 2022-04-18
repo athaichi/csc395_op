@@ -105,7 +105,7 @@ void exec_setup(struct stivale2_struct* hdr) {
 
             // memcpy data into the virtual address
             // if file size is 0 use filesz otherwise use memsz
-            k_memcpy((uintptr_t*)(ph_entry->p_vaddr), (uintptr_t*)((uintptr_t)header + ph_entry->p_offset),  ph_entry->p_memsz); 
+            kmemcpy((uintptr_t*)(ph_entry->p_vaddr), (uintptr_t*)((uintptr_t)header + ph_entry->p_offset),  ph_entry->p_memsz); 
 
             // get flags, writable = 0x2, executable = 0x1
             bool writable = false, executable = false; 
