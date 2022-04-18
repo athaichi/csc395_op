@@ -5,4 +5,3 @@ kernel/obj
 **/.DS_Store
 init/obj
 stdlib/obj
-../.vscode/
