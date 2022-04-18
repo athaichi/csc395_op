@@ -1,5 +1,8 @@
 #include <stdint.h>
 
+// strtok/strtok_r
+
+
 // credit: https://stackoverflow.com/questions/3213827/how-to-iterate-over-a-string-in-c 
 uint64_t kstrlen(const char* str) {
   uint64_t len = 0;
@@ -11,7 +14,7 @@ uint64_t kstrlen(const char* str) {
 }
 
 char* kstrcat(char* dest, const char* src, int len) {
-  int oglen = kstrlen(dest); 
+  int oglen = kstrlen(dest); //ignore the null terminator 
   char buf[oglen+len+1]; // +1 for null terminator 
 
   // move over given from src
@@ -32,4 +35,63 @@ char* kstrcat(char* dest, const char* src, int len) {
   char* returned = buf; 
   return returned; 
 }
+
+char* kstrcpy (char* dest, char* src) {
+  int len = kstrlen(src); 
+
+  // copy over char by char, including null terminator
+  for (int i = 0; i < len; i++) {
+    *(dest++) = *(src++);  
+  }
+
+  return dest; 
+}
+
+int kstrcmp(const char *s1, const char *s2) {
+  int len1 = kstrlen(s1); 
+  int len2 = kstrlen(s2); 
+
+  // if the strings are of equal length
+  if (len1 == len2) {
+
+    // go through each char and compare
+    for (int i = 0; i < len1; i++) {
+
+      // if the chars are the same, check next char
+      if (*s1 == *s2) { s1++; s2++; }
+
+      // if not same: 
+      else {
+
+        // if the left str char is bigger return 1
+        if (*s1 > *s2) { return 1; }
+
+        // otherwise return -1
+        else { return -1; }
+      }
+    }
+
+    // if strings are the same, return 0
+    return 0; 
+  }
+
+  // if the lengths are not the same
+  else {
+    
+    // if left string is longer, return 1
+    if (len1 > len2) { return 1; }
+
+    // otherwise return -1
+    else { return -1; }
+  }
+
+}
+
+// int katoi(const char *str) { }
+
+// char * kstrsep(char **stringp, const char *delim) { }
+
+// char * kstrpbrk(const char *s, const char *charset) { }
+
+// char * kstrtok(char *restrict str, const char *restrict sep) { }
 

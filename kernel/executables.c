@@ -5,8 +5,8 @@
 #include <memory.h>
 
 #include "kprint.h"
-#include "memory.h"
 #include "page.h"
+#include "mem.h"
 
 // ---------------------------------------------------------
 // | Definitions & Structs |  // NOTE: These are taken directly from ELF64 specifications
