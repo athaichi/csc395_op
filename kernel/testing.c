@@ -4,67 +4,67 @@
 
 #include "kprint.h"
 
-void kprint_tests() {
+// void kprint_tests() {
 
-  // test kprint_c
-  char test = 'h';  
-  kprint_c(test);
-  test = 'H'; 
-  kprint_c(test);
-  kprint_c(' ');
-  kprint_c('}');
-  kprint_c('Q');
-  kprint_c('q'); 
-  kprint_c('\n');
+//   // test kprint_c
+//   char test = 'h';  
+//   kprint_c(test);
+//   test = 'H'; 
+//   kprint_c(test);
+//   kprint_c(' ');
+//   kprint_c('}');
+//   kprint_c('Q');
+//   kprint_c('q'); 
+//   kprint_c('\n');
 
-  // test kprint_d
-  kprint_d(2);
-  kprint_c('\n'); 
-  kprint_d(0); 
-  kprint_c('\n'); 
-  kprint_d(1000); 
-  kprint_c('\n'); 
-  kprint_d(1342); 
-  kprint_c('\n'); 
-  kprint_d(5379); 
+//   // test kprint_d
+//   kprint_d(2);
+//   kprint_c('\n'); 
+//   kprint_d(0); 
+//   kprint_c('\n'); 
+//   kprint_d(1000); 
+//   kprint_c('\n'); 
+//   kprint_d(1342); 
+//   kprint_c('\n'); 
+//   kprint_d(5379); 
 
-  //test kprint_s
-  kprint_s("hello\n");
-  kprint_s("hi! nice to meet you????\n"); 
-  kprint_s("4384>?<P{_)(*&^$#@!\t check tabs"); 
+//   //test kprint_s
+//   kprint_s("hello\n");
+//   kprint_s("hi! nice to meet you????\n"); 
+//   kprint_s("4384>?<P{_)(*&^$#@!\t check tabs"); 
 
-  // test strlen
-  kprint_d(kstrlen("hello")); // should be 5
-  kprint_c(' ');  
-  kprint_d(kstrlen("hi")); // should be 2
-  kprint_c(' '); 
-  kprint_d(kstrlen("hey this is joe")); // should be 15
+//   // test strlen
+//   kprint_d(kstrlen("hello")); // should be 5
+//   kprint_c(' ');  
+//   kprint_d(kstrlen("hi")); // should be 2
+//   kprint_c(' '); 
+//   kprint_d(kstrlen("hey this is joe")); // should be 15
 
-  // test kprint_x
-  kprint_x(0); // should be 0
-  kprint_c(' '); 
-  kprint_x(10); // should be a
-  kprint_c(' ');
-  kprint_x(48362); // should be bcea
-  kprint_c(' ');
-  kprint_x(4738295); // should be 484cf7
+//   // test kprint_x
+//   kprint_x(0); // should be 0
+//   kprint_c(' '); 
+//   kprint_x(10); // should be a
+//   kprint_c(' ');
+//   kprint_x(48362); // should be bcea
+//   kprint_c(' ');
+//   kprint_x(4738295); // should be 484cf7
 
-  // test kprint_p
-  kprint_p(kprint_tests); 
-}
+//   // test kprint_p
+//   kprint_p(kprint_tests); 
+// }
 
-  //translate(_start, hdr);
-  //translate(stack, hdr);  
-  //translate(usable_memory, hdr);
-  //translate(NULL, hdr); 
+//   //translate(_start, hdr);
+//   //translate(stack, hdr);  
+//   //translate(usable_memory, hdr);
+//   //translate(NULL, hdr); 
 
-  // kprintf("interrupt should be above this\n"); 
+//   // kprintf("interrupt should be above this\n"); 
 
-  // mem_init(hdr);
-  // kprintf("init finished\n");
+//   // mem_init(hdr);
+//   // kprintf("init finished\n");
 
-  // // test vm_map()
-  // // Enable write protection
+//   // // test vm_map()
+//   // // Enable write protection
   // uint64_t cr0 = read_cr0();
   // cr0 |= 0x10000;
   // write_cr0(cr0);
@@ -195,5 +195,5 @@ void kprint_tests() {
   //exec_setup(hdr);
 
 void all_tests() {
-    kprint_tests(); 
+   // kprint_tests(); 
 }

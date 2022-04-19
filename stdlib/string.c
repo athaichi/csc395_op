@@ -4,7 +4,7 @@
 
 
 // credit: https://stackoverflow.com/questions/3213827/how-to-iterate-over-a-string-in-c 
-uint64_t kstrlen(const char* str) {
+uint64_t strlen(const char* str) {
   uint64_t len = 0;
   while(*str) { //if we haven't finished iterating over the string, 
     len++; // increase length and 
@@ -14,7 +14,7 @@ uint64_t kstrlen(const char* str) {
 }
 
 char* kstrcat(char* dest, const char* src, int len) {
-  int oglen = kstrlen(dest); //ignore the null terminator 
+  int oglen = strlen(dest); //ignore the null terminator 
   char buf[oglen+len+1]; // +1 for null terminator 
 
   // move over given from src
@@ -37,7 +37,7 @@ char* kstrcat(char* dest, const char* src, int len) {
 }
 
 char* kstrcpy (char* dest, char* src) {
-  int len = kstrlen(src); 
+  int len = strlen(src); 
 
   // copy over char by char, including null terminator
   for (int i = 0; i < len; i++) {
@@ -48,8 +48,8 @@ char* kstrcpy (char* dest, char* src) {
 }
 
 int kstrcmp(const char *s1, const char *s2) {
-  int len1 = kstrlen(s1); 
-  int len2 = kstrlen(s2); 
+  int len1 = strlen(s1); 
+  int len2 = strlen(s2); 
 
   // if the strings are of equal length
   if (len1 == len2) {

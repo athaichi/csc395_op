@@ -25,7 +25,7 @@ void kprint_c(char c) {
 }
 
 void kprint_s(const char* str) {
-  uint64_t len = kstrlen(str);
+  uint64_t len = strlen(str);
   for (int i = 0; i < len; i++) { term_putchar(*str); str++; }
 }
 
