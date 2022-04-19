@@ -80,27 +80,25 @@ typedef struct elf_phdr {
 
 // ---------------------------------------------------------------
 
+// hdr from boot.c _start
+extern struct stivale2_struct* hdr;
 
-void exec_setup(struct stivale2_struct* hdr) {
+void exec_setup(char* modulename) {
     // find a module - right now hardcoded to the first module
     struct stivale2_struct_tag_modules* moduleslist = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
     struct stivale2_module ourmod = moduleslist->modules[0]; 
-
-    //kprintf("got modules...\n"); 
 
     // cast it to an elf header 
     elf_hdr_t* header = (elf_hdr_t*)(ourmod.begin); 
 
     // locate the program header table
     elf_phdr_t* ph_entry = (elf_phdr_t*)((uintptr_t)header + header->e_phoff); 
-    //kprintf("got to the header...\n"); 
 
     // get physical address
     uintptr_t cr3 = read_cr3() & 0xFFFFFFFFFFFFF000;
 
     // loop over the entries 
     for (uint16_t i = 0; i < header->e_phnum; i++) {
-        //kprintf("in loop, on round %d. type = %d\n", i, ph_entry->p_type); 
 
         // if entry has type LOAD and size > 0
         if ((ph_entry->p_type == LOAD) && (ph_entry->p_filesz > 0)) {
@@ -108,8 +106,7 @@ void exec_setup(struct stivale2_struct* hdr) {
 
             // vm_map for the entry - init set as non-executable
             bool ret = vm_map(cr3, ph_entry->p_vaddr, true, true, false); 
-            //if (ret) {kprintf("vm mapped for section %d out of %d...\n", i, header->e_phnum); }
-
+            
             // memcpy data into the virtual address
             // if file size is 0 use filesz otherwise use memsz
             if (ph_entry->p_filesz == 0) {
@@ -131,14 +128,8 @@ void exec_setup(struct stivale2_struct* hdr) {
         ph_entry++; 
     }
     
-    // // cast entry point to a function pointer and run!
-    // typedef void (*entry_fn_ptr_t)(); 
 
-    // entry_fn_ptr_t entry = (entry_fn_ptr_t)header->e_entry; 
-    // //kprintf("got to end\n"); 
-    // entry();
-
-      // Pick an arbitrary location and size for the user-mode stack
+    // Pick an arbitrary location and size for the user-mode stack
     uintptr_t user_stack = 0x70000000000;
     size_t user_stack_size = 8 * PAGESIZE;
 
@@ -152,7 +143,7 @@ void exec_setup(struct stivale2_struct* hdr) {
     usermode_entry(USER_DATA_SELECTOR | 0x3,            // User data selector with priv=3
                     user_stack + user_stack_size - 8,   // Stack starts at the high address minus 8 bytes
                     USER_CODE_SELECTOR | 0x3,           // User code selector with priv=3
-                    header->e_entry);                     // Jump to the entry point specified in the ELF file
+                    header->e_entry);                   // Jump to the entry point specified in the ELF file
 
 }
 
