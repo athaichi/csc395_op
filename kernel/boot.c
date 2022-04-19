@@ -17,16 +17,6 @@
 #include "executables.h"
 #include "gdt.h"
 
-// #define PAGESIZE 0x1000
-
-// extern int64_t KERNEL_CODE_SELECTOR;
-// extern int64_t KERNEL_DATA_SELECTOR;
-// extern int64_t USER_CODE_SELECTOR;
-// extern int64_t USER_DATA_SELECTOR;
-// extern int64_t TSS_SELECTOR; 
-
-
-
 // Reserve space for the stack
 static uint8_t stack[8192];
 
@@ -272,10 +262,15 @@ void write_cr0(uint64_t value) {
 
 // -------------------------------------------------
 
-void _start(struct stivale2_struct* hdr) {
+// set a global hdr variable 
+struct stivale2_struct* hdr; 
+
+void _start(struct stivale2_struct* ihdr) {
   // -------------------------------------------
   // | SETUP |
   // ---------
+
+  hdr = ihdr; 
   // We've booted! Let's start processing tags passed to use from the bootloader
   init_init(hdr); 
   term_init();
@@ -319,7 +314,7 @@ void _start(struct stivale2_struct* hdr) {
   // test to see if we can get access pages in usermode
   uintptr_t test_page = 0x400000000;
   bool ret = vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, true, true, false);
-  if (ret) { exec_setup(hdr); }
+  if (ret) { exec_setup("init"); }
   else {kprintf("failed to vm_map\n"); }
 
   // char* og = "hello!"; 
