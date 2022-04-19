@@ -9,6 +9,7 @@
     "stddef.h": "c",
     "systemcalls.h": "c",
     "executables.h": "c",
-    "string.h": "c"
+    "string.h": "c",
+    "process.h": "c"
   }
 }
