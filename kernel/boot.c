@@ -319,11 +319,6 @@ void _start(struct stivale2_struct* hdr) {
   bool ret = vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, true, true, false);
   if (ret) { exec_setup(hdr); }
   else { kprintf("failed to vm_map\n"); }
-  
-
-  // get modules
-  // kprint_s("Modules: \n"); 
-  // find_modules(hdr); 
 
 	// We're done, just hang...
 	halt();
