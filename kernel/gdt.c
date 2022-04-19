@@ -34,7 +34,7 @@ void gdt_code_descriptor(uint16_t offset, bool user) {
   }
 
   // Zero out the descriptor
-  kmemset(d, 0, sizeof(seg_descriptor_t));
+  memset(d, 0, sizeof(seg_descriptor_t));
 
   // Fill in the type and flags fields
   d->access = 0x9A | (user ? 0x60 : 0);
@@ -50,7 +50,7 @@ void gdt_data_descriptor(uint16_t offset, bool user) {
   }
 
   // Zero out the descriptor
-  kmemset(d, 0, sizeof(seg_descriptor_t));
+  memset(d, 0, sizeof(seg_descriptor_t));
 
   // Fill in the type field
   d->access = 0x92 | (user ? 0x60 : 0);
@@ -97,7 +97,7 @@ void gdt_tss_descriptor(uint16_t offset, tss_t* tss) {
   }
 
   // Zero out the descriptor
-  kmemset(d, 0, sizeof(sys_descriptor_t));
+  memset(d, 0, sizeof(sys_descriptor_t));
 
   // The base fields point to the TSS
   d->base_0 = (uintptr_t)tss;
@@ -121,7 +121,7 @@ uint8_t interrupt_stack[0x8000];
 
 void gdt_setup() {
   // Zero out the gdt
-  kmemset(gdt, 0, sizeof(gdt));
+  memset(gdt, 0, sizeof(gdt));
 
   // Create the kernel code and data descriptors
   gdt_code_descriptor(KERNEL_CODE_SELECTOR, false);
@@ -142,7 +142,7 @@ void gdt_setup() {
   __asm__("lgdt %0" :: "m"(record));
 
   // Zero out the TSS
-  kmemset(&tss, 0, sizeof(tss)); 
+  memset(&tss, 0, sizeof(tss)); 
 
   // Interrupts delivered while in user mode should use this stack pointer
   tss.rsp0 = (uintptr_t)interrupt_stack + sizeof(interrupt_stack) - 8;

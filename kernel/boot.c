@@ -171,7 +171,7 @@ void term_putchar(char c) {
   // Scroll if needed
   if (term_row == VGA_HEIGHT) {
     // Shift characters up a row
-    kmemcpy(term, &term[VGA_WIDTH], sizeof(vga_entry_t) * VGA_WIDTH * (VGA_HEIGHT - 1));
+    memcpy(term, &term[VGA_WIDTH], sizeof(vga_entry_t) * VGA_WIDTH * (VGA_HEIGHT - 1));
     term_row--;
     
     // Clear the last row

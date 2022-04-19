@@ -340,7 +340,7 @@ bool vm_map(uintptr_t root, uintptr_t address, bool usable, bool writable, bool 
       pt_entry_t * new_table = (pt_entry_t*)(new_table_phys + hhdm_base); 
 
       // zero it out
-      kmemset(new_table, 0, 0x1000);
+      memset(new_table, 0, 0x1000);
 
       // update previous table to have the newly allocated table
       table[index].present = 1; 

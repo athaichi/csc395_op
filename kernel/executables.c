@@ -74,6 +74,9 @@ typedef struct elf_phdr {
     elf_xword p_align;      // alignment of segment
 } __attribute__((packed)) elf_phdr_t; 
 
+// Jump to usermode 
+extern void usermode_entry(uint64_t data_sel, uintptr_t stack_ptr, uint64_t code_sel, uintptr_t instruction_ptr, ...);
+
 // ---------------------------------------------------------------
 
 
@@ -108,7 +111,7 @@ void exec_setup(struct stivale2_struct* hdr) {
 
             // memcpy data into the virtual address
             // if file size is 0 use filesz otherwise use memsz
-            kmemcpy((uintptr_t*)(ph_entry->p_vaddr), (uintptr_t*)((uintptr_t)header + ph_entry->p_offset),  ph_entry->p_memsz); 
+            memcpy((uintptr_t*)(ph_entry->p_vaddr), (uintptr_t*)((uintptr_t)header + ph_entry->p_offset),  ph_entry->p_memsz); 
 
             // get flags, writable = 0x2, executable = 0x1
             bool writable = false, executable = false; 
