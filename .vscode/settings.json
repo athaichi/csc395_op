@@ -8,6 +8,7 @@
     "stivale2.h": "c",
     "stddef.h": "c",
     "systemcalls.h": "c",
-    "executables.h": "c"
+    "executables.h": "c",
+    "string.h": "c"
   }
 }

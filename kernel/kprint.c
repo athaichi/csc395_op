@@ -2,28 +2,30 @@
 #include <stddef.h>
 #include <stdarg.h>
 
+#include <string.h>
+
 #include "kprint.h"
 
 // typedef void (*term_write_t)(const char*, size_t);
 // extern term_write_t term_write;
 extern void term_putchar(char c); 
 
-// credit: https://stackoverflow.com/questions/3213827/how-to-iterate-over-a-string-in-c 
-uint64_t kstrlen(const char* str) {
-  uint64_t len = 0;
-  while(*str) { //if we haven't finished iterating over the string, 
-    len++; // increase length and 
-    str++; // check next charactter
-  }
-  return len; 
-}
+// // credit: https://stackoverflow.com/questions/3213827/how-to-iterate-over-a-string-in-c 
+// uint64_t kstrlen(const char* str) {
+//   uint64_t len = 0;
+//   while(*str) { //if we haven't finished iterating over the string, 
+//     len++; // increase length and 
+//     str++; // check next charactter
+//   }
+//   return len; 
+// }
 
 void kprint_c(char c) {
   term_putchar(c); 
 }
 
 void kprint_s(const char* str) {
-  uint64_t len = kstrlen(str);
+  uint64_t len = strlen(str);
   for (int i = 0; i < len; i++) { term_putchar(*str); str++; }
 }
 

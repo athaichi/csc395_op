@@ -1,5 +1,7 @@
 #include <stdint.h>
 
+#include <string.h>
+
 #include "systemcalls.h"
 #include "kprint.h"
 
@@ -92,29 +94,6 @@ char getkey(uint8_t code) {
   return keys[code]; 
 }
 
-char* kstrcat(char* dest, const char* src, int len) {
-  int oglen = kstrlen(dest); 
-  char buf[oglen+len+1]; // +1 for null terminator 
-
-  // move over given from src
-  for (int i = 0; i < oglen; i++) {
-    buf[i] = *dest; 
-    dest++; 
-  }
-
-  // add on new stuff
-  for (int i = 0; i < len; i++) {
-    buf[oglen+i] = *src; 
-    src++; 
-  }
-
-  // add null terminator
-  buf[oglen+len+1] = '\0';
-
-  char* returned = buf; 
-  return returned; 
-}
-
 // system call read() function 
 // fix this to handle backspace
 int read(uint64_t buf, uint64_t numchars) {
@@ -124,8 +103,6 @@ int read(uint64_t buf, uint64_t numchars) {
   // fill the new buffer using kgetc
   for (int i = 0; i < numchars; i++) {
     char ret = kgetc(); 
-    //strcat(char*dest, const char c, size_t len) 
-    //kstrcat(buff, &ret, 1); 
     buff[i] = ret;
     kprintf("%c", ret); 
   }

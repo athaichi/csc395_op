@@ -2,12 +2,15 @@
 #include <stddef.h>
 #include <stdarg.h>
 
+#include <string.h>
+#include <memory.h>
+
 #include "stivale2.h"
 #include "util.h"
 #include "interrupts.h"
 #include "page.h"
 #include "kprint.h"
-#include "memory.h"
+#include "mem.h"
 #include "pic.h"
 #include "port.h"
 #include "systemcalls.h"
@@ -168,7 +171,7 @@ void term_putchar(char c) {
   // Scroll if needed
   if (term_row == VGA_HEIGHT) {
     // Shift characters up a row
-    k_memcpy(term, &term[VGA_WIDTH], sizeof(vga_entry_t) * VGA_WIDTH * (VGA_HEIGHT - 1));
+    kmemcpy(term, &term[VGA_WIDTH], sizeof(vga_entry_t) * VGA_WIDTH * (VGA_HEIGHT - 1));
     term_row--;
     
     // Clear the last row
@@ -276,7 +279,6 @@ void _start(struct stivale2_struct* hdr) {
   // We've booted! Let's start processing tags passed to use from the bootloader
   init_init(hdr); 
   term_init();
-  //term_setup(hdr);
   gdt_setup(); 
   idt_setup(); 
   mem_init(hdr); 
@@ -319,6 +321,28 @@ void _start(struct stivale2_struct* hdr) {
   bool ret = vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, true, true, false);
   if (ret) { exec_setup(hdr); }
   else { kprintf("failed to vm_map\n"); }
+  // uintptr_t test_page = 0x400000000;
+  // bool ret = vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, true, true, false);
+  // if (ret) { exec_setup(hdr); }
+  // else {kprintf("failed to vm_map\n"); }
+
+  // char* og = "hello!"; 
+  // char dup[7]; 
+  // kstrcpy(dup, og); 
+  // kprintf("copied string is: %s\n", dup); 
+  // int ret = kstrcmp(og, dup); 
+  // kprintf("strings should be the same: %d\n", ret);  
+  // char * add = "hello!"; 
+  // char * new = kstrcat(dup, add, 6); 
+  // kprintf("new str is: %s\n", new); 
+  // ret = kstrcmp(og, new); 
+  // kprintf("strs should not be the same: %d\n", ret); 
+
+  
+
+  // get modules
+  // kprint_s("Modules: \n"); 
+  // find_modules(hdr); 
 
 	// We're done, just hang...
 	halt();

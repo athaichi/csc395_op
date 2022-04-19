@@ -3,8 +3,10 @@
 #include <stdarg.h>
 #include <stdbool.h>
 
-#include "memory.h"
+#include <memory.h>
+
 #include "kprint.h"
+#include "mem.h"
 // note to self: bottom bits are on the right
 
 
