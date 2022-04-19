@@ -3,8 +3,8 @@
 #include "stivale2.h"
 
 uintptr_t read_cr3();
-uintptr_t get_hhdm(struct stivale2_struct* hdr);
-void translate(void* address, struct stivale2_struct* hdr);
+uintptr_t get_hhdm();
+void translate(void* address);
 void* ptov (uint64_t paddr); 
 
 uintptr_t pmem_alloc(); 

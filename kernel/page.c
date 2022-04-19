@@ -38,8 +38,11 @@ void write_cr3(uint64_t value) {
   __asm__("mov %0, %%cr3" : : "r" (value));
 }
 
+// gets set in boot.c _start
+extern struct stivale2_struct* hdr;
+
 // create a helper to get physical to virtual 
-uintptr_t get_hhdm(struct stivale2_struct* hdr) {
+uintptr_t get_hhdm() {
   struct stivale2_struct_tag_hhdm* hhdm = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
   return (uintptr_t)hhdm->addr; 
 }
@@ -49,13 +52,13 @@ uintptr_t get_hhdm(struct stivale2_struct* hdr) {
  *
  * \param address     The virtual address to translate
  */
-void translate(void* address, struct stivale2_struct* hdr) {
+void translate(void* address) {
 
   // find starting table address
   uintptr_t table_phys = read_cr3() & 0xFFFFFFFFFFFFF000;
 
   // get hhdm tag 
-  uintptr_t hhdm_base = (uintptr_t)(get_hhdm(hdr)); 
+  uintptr_t hhdm_base = (uintptr_t)(get_hhdm()); 
 
   // find the first table 
   pt_entry_t * table = (pt_entry_t *)(table_phys + hhdm_base); 
@@ -244,9 +247,10 @@ void unmap_lower_half(uintptr_t root) {
 - sets up global hhdm base
 - puts stuff in the freelist
 */
-void mem_init(struct stivale2_struct* hdr) {
+void mem_init() {
   // set global
-  hhdm_base = (uintptr_t)(get_hhdm(hdr));
+
+  hhdm_base = (uintptr_t)(get_hhdm());
   //kprintf("hhdm is %p\n", hhdm_base);
 
   // put stuff in freelist
