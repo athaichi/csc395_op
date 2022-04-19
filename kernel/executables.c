@@ -7,6 +7,7 @@
 #include "kprint.h"
 #include "page.h"
 #include "mem.h"
+#include "gdt.h"
 
 // ---------------------------------------------------------
 // | Definitions & Structs |  // NOTE: These are taken directly from ELF64 specifications
@@ -26,6 +27,8 @@
 #define W 0x2       // write premission 
 #define X 0x1       // execute permission
 #define R 0x4       // read permission
+
+#define PAGESIZE 0x1000
 
 // Struct for an elf64 header 
 typedef struct elf_hdr {
@@ -120,12 +123,22 @@ void exec_setup(struct stivale2_struct* hdr) {
         ph_entry++; 
     }
     
-    // cast entry point to a function pointer and run!
-    typedef void (*entry_fn_ptr_t)(); 
+    // Pick an arbitrary location and size for the user-mode stack
+    uintptr_t user_stack = 0x70000000000;
+    size_t user_stack_size = 8 * PAGESIZE;
 
-    entry_fn_ptr_t entry = (entry_fn_ptr_t)header->e_entry; 
-    //kprintf("got to end\n"); 
-    entry();
+    // Map the user-mode-stack
+    for(uintptr_t p = user_stack; p < user_stack + user_stack_size; p += 0x1000) {
+        // Map a page that is user-accessible, writable, but not executable
+        vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, p, true, true, false);
+    }   
+
+    // And now jump to the entry point
+    usermode_entry(USER_DATA_SELECTOR | 0x3,            // User data selector with priv=3
+                    user_stack + user_stack_size - 8,   // Stack starts at the high address minus 8 bytes
+                    USER_CODE_SELECTOR | 0x3,           // User code selector with priv=3
+                    header->e_entry);                     // Jump to the entry point specified in the ELF file
+
 }
 
 // void find_modules(struct stivale2_struct* hdr) {

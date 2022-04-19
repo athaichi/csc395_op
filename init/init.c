@@ -2,8 +2,10 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#define SYS_read 0
-#define SYS_write 1
+#include <io.h>
+
+// #define SYS_read 0
+// #define SYS_write 1
 
 extern int syscall(uint64_t nr, ...);
 
@@ -16,10 +18,10 @@ void _start() {
   test_page[3] = 'l';
   test_page[4] = 'o';
   test_page[5] = '\n';
-  //syscall(SYS_write, 1, test_page, 6);
+  write(STDOUT, test_page);
 
   // Issue a write system call
-  syscall(SYS_write, 1, "Hello world!\n", 13);
+  write(STDOUT, "Hello world!\n");
 
   
 

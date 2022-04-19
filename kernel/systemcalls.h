@@ -6,8 +6,8 @@
 
 // Functions
 char getkey(uint8_t code); 
-int read(uint64_t buf, uint64_t numchars); 
-int write(uint64_t buf, uint64_t len); 
+int kread(uint64_t buf, uint64_t numchars); 
+int kwrite(uint64_t buf, uint64_t len); 
 void char_write(char key); 
 char kgetc();  
 
