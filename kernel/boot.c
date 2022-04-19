@@ -316,7 +316,7 @@ void _start(struct stivale2_struct* hdr) {
 
   // test to see if we can get access pages in usermode
   uintptr_t test_page = 0x400000000;
-  bool ret = vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, false, true, false);
+  bool ret = vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, true, true, false);
   if (ret) { exec_setup(hdr); }
   else { kprintf("failed to vm_map\n"); }
   

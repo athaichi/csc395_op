@@ -19,7 +19,7 @@ void _start() {
   syscall(SYS_write, 1, test_page, 6);
 
   // Issue a write system call
-  //syscall(SYS_write, 1, "Hello world!\n", 13);
+  syscall(SYS_write, 1, "Hello world!\n", 13);
 
   
 
