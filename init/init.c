@@ -4,10 +4,17 @@
 
 #include <io.h>
 #include <process.h>
+#include <string.h>
 
 extern int syscall(uint64_t nr, ...);
+//extern struct module_t; 
 
-bool askinput(char* modname) {
+typedef struct modlist {
+  char * name; 
+  struct modlist * next;
+} __attribute__((packed)) modlist_t;
+
+bool askinput(char* modname, modlist_t* modlist, int modnum) {
   char* curchar = NULL; 
   int counter = 0; 
 
@@ -16,47 +23,51 @@ bool askinput(char* modname) {
     read(STDIN, curchar, 1); 
 
     // if user input is done
-    if (curchar == '\n') {
+    if (*curchar == '\n') {
 
       // see if the command matches an available module name
-      for (;;){}
+      for (int i = 0; i < modnum; i++) {
+        int ret = strcmp(modname, modlist->name); 
+        
+        // match! return true so we can exec back in _start
+        if (ret == 0) {
+          return true; 
+        }
 
-      // match! return true so we can exec back in _start
-      //return true
+        modlist = modlist->next; 
+      }
 
-      // no dice, return false 
-      //return false; 
-
-
+      // no dice, return false
+      return false; 
     }
 
+    // if input is not done, put it into modname
+    strcat(modname, curchar, 1); 
   }
+
+  // if you're here, input is invalid 
+  return false; 
 
 }
 
 void _start() {
 
-  // char* test_page = (char*)0x400000000;
-  // test_page[0] = 'h';
-  // test_page[1] = 'e';
-  // test_page[2] = 'l';
-  // test_page[3] = 'l';
-  // test_page[4] = 'o';
-  // test_page[5] = '\n';
-  // write(STDOUT, test_page);
-
   // Issue a write system call
   write(STDOUT, "Init start!\n$");
+  
+  // get a list of all the modules
+  modlist_t* modlist = (modlist_t*)getmodules(); 
+  int modnum = getmodnums(); 
 
   char modname[20]; 
 
   // read in user input: 
-  bool valid = askinput(modname); 
+  bool valid = askinput(modname, modlist, modnum); 
 
   // if command is not valid, ask for a new input
   while(!valid) {
     write(STDOUT, "   Invalid command.\n$");  
-    askinput(modname); 
+    askinput(modname, modlist, modnum); 
   }
   
   // if inputs match module names, exec

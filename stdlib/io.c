@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "io.h"
 #include "../kernel/systemcalls.h"
 

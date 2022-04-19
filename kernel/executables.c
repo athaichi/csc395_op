@@ -3,13 +3,16 @@
 #include <stdarg.h>
 
 #include <memory.h>
+#include <string.h>
 
 #include "kprint.h"
 #include "page.h"
 #include "gdt.h"
 #include "mem.h"
+#include "executables.h"
 
 #define PAGESIZE 0x1000
+#define MAX_MODNAME_LENGTH 30
 
 
 // ---------------------------------------------------------
@@ -83,10 +86,60 @@ typedef struct elf_phdr {
 // hdr from boot.c _start
 extern struct stivale2_struct* hdr;
 
-void exec_setup(char* modulename) {
-    // find a module - right now hardcoded to the first module
+// set up pointer to the front of the list
+modname_t * modnamelist = NULL; 
+
+void * modnames () {
+    // find the list of modules
     struct stivale2_struct_tag_modules* moduleslist = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
-    struct stivale2_module ourmod = moduleslist->modules[0]; 
+    int modnum = moduleslist->module_count;
+
+    // set up a curmod
+    struct stivale2_module curmod; 
+
+    // go through and add a new list entry per mod
+    for (int i = 0; i < modnum; i++) {
+        curmod = moduleslist->modules[i]; 
+        modname_t * new = NULL; 
+        new->name = curmod.string; 
+
+        // update head of linked list
+        new->next = modnamelist; 
+        modnamelist = new;  
+    } 
+
+    return (void*)modnamelist; 
+}
+
+int modnum() {
+    // get list of modules
+    struct stivale2_struct_tag_modules* moduleslist = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
+    int modnum = moduleslist->module_count;
+    return modnum; 
+}
+
+void exec_setup(char* modulename) {
+    // find correct module
+    struct stivale2_struct_tag_modules* moduleslist = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
+    struct stivale2_module ourmod;
+    bool found = false; // set this to one when we find the module
+
+    for (int i = 0; i < moduleslist->module_count; i++) {
+        ourmod = moduleslist->modules[i]; 
+        int ret = strcmp(modulename, ourmod.string); 
+        
+        // we've found the right module
+        if (ret == 0) {
+            found = true; 
+            break; 
+        } 
+    } 
+
+    // make sure the module is found
+    if (!found) {
+        kprintf("An error occured when trying to find the module. \n"); 
+        return; 
+    }
 
     // cast it to an elf header 
     elf_hdr_t* header = (elf_hdr_t*)(ourmod.begin); 
@@ -146,26 +199,3 @@ void exec_setup(char* modulename) {
                     header->e_entry);                   // Jump to the entry point specified in the ELF file
 
 }
-
-// void find_modules(struct stivale2_struct* hdr) {
-//   struct stivale2_struct_tag_modules* modules = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
-
-//   for(uint64_t current = 0; current < modules->module_count; current++) {
-//     struct stivale2_module cur = modules->modules[current]; 
-    
-//     //print all the modules
-//     //print name
-//     for (int i = 0; i<128; i++) {
-//       //char n = cur.string[i]; 
-//       //kprint_c(n); 
-//       //if (n == '\0') { break; }
-//     }
-//     kprint_s("    0x");
-//     kprint_x(cur.begin); 
-//     kprint_s(" - 0x"); 
-//     kprint_x(cur.end); 
-
-//     // format for next entry 
-//     kprint_c('\n');
-//   }
-// }
