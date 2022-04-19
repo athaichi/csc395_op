@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 // credit: https://aticleworld.com/memset-in-c/ 
-void kmemset(void *arr, uint32_t c, size_t len) {
+void memset(void *arr, uint32_t c, size_t len) {
     uint8_t *current = arr; 
     for (size_t  i = 0; i < len; i++) {
         current[i] = c; 
@@ -12,7 +12,7 @@ void kmemset(void *arr, uint32_t c, size_t len) {
 }
 
 // implementation from https://www.geeksforgeeks.org/write-memcpy/ 
-void kmemcpy (void* dest, void* src, uint64_t size) {
+void memcpy (void* dest, void* src, uint64_t size) {
     char* csrc = (char*)src; 
     char* cdest = (char*)dest; 
 

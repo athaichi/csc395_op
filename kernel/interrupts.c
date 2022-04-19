@@ -8,6 +8,7 @@
 #include "util.h"
 #include "interrupts.h"
 #include "kprint.h"
+#include "gdt.h"
 
 // Make an IDT
 idt_entry_t idt[256];
@@ -46,7 +47,7 @@ void idt_set_handler(uint8_t index, void* fn, uint8_t type) {
     uint32_t offset2 = (function >> 32) & 0xFFFFFFFF;
 
     idt[index].offset_0 = offset0; 
-    idt[index].selector = KERNEL_CODE_SELECT;  // run in kernel mode, set to KERNEL_CODE_SELECT for user mode 
+    idt[index].selector = KERNEL_CODE_SELECTOR;  // run in kernel mode, set to KERNEL_CODE_SELECT for user mode 
     idt[index].ist = 0;        // aren't using an interrupt stack table, so just pass 0
     idt[index]._unused_0 = 0; 
     idt[index].type = type;    // using the parameter passed to this function
@@ -197,7 +198,7 @@ void handler20(interrupt_context_t* ctx, uint64_t ec) {
  */
 void idt_setup() {
   // Step 1: Zero out the IDT, probably using memset (which you'll have to implement)
-  kmemset(idt, 0, sizeof(idt)); 
+  memset(idt, 0, sizeof(idt)); 
 
   // -----------------------------------------------
 

@@ -13,7 +13,7 @@ uint64_t strlen(const char* str) {
   return len; 
 }
 
-char* kstrcat(char* dest, const char* src, int len) {
+char* strcat(char* dest, const char* src, int len) {
   int oglen = strlen(dest); //ignore the null terminator 
   char buf[oglen+len+1]; // +1 for null terminator 
 
@@ -36,7 +36,7 @@ char* kstrcat(char* dest, const char* src, int len) {
   return returned; 
 }
 
-char* kstrcpy (char* dest, char* src) {
+char* strcpy (char* dest, char* src) {
   int len = strlen(src); 
 
   // copy over char by char, including null terminator
@@ -47,7 +47,7 @@ char* kstrcpy (char* dest, char* src) {
   return dest; 
 }
 
-int kstrcmp(const char *s1, const char *s2) {
+int strcmp(const char *s1, const char *s2) {
   int len1 = strlen(s1); 
   int len2 = strlen(s2); 
 
