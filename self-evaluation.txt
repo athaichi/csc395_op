@@ -5,13 +5,23 @@ is a score that I have given myself, as well as an explanation or justification 
 the score given. Additional comments may be amended below each section if there 
 is more information that I think is key to understanding a particular rubric item. 
 
+PLEASE NOTE: there are two branches on my github associated with this project. As per 
+    your comment to me in office hours, I am going to submit them unmerged. 
+    REORGANIZE: holds pretty much all documentation. 
+    MAIN: holds the shell and additional modules. 
+
 1. Input/Output
     Score: 3/3
-    Justification: I have used 
+    Justification: I have a large test set in the testing.c file. Unfortunately, some of 
+        the function names have changed as they migrated into the stdlib, however the core 
+        tests have remained the same. Comments alongside the different calls tell you what 
+        you should expect to see if you run them. 
 
 2. Exceptions: 
     Score: 3/3
-    Justification: 
+    Justification: I can trigger exceptions using the __asm__ command given in the 
+        instructions for exceptions. I also have been triggering them as I have been working
+        through the rest of the kernel implementation. 
 
 3. Virtual Memory: 
     Score: 3/3
@@ -68,7 +78,9 @@ is fine enough to be worth 3/3. However, it currently cannot do that, which is w
         in an invalid command, it will tell you it is invalid and prompt you for another command. 
 
 10. Code Quality: 
-    Score: 2/3
-    Justification: 
+    Score: 3/3
+    Justification: I think between function documentation and inter-function comments, code is clear and 
+        divided logically. Relatively short is, of course, relative. It would have been better
+        if I had been able to keep up with my README, but alas. 
 
-Total Score: 24/30
+Total Score: 25/30
