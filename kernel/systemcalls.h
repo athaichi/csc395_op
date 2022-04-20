@@ -1,8 +1,11 @@
 #pragma once
 
+#include <stdint.h>
+
 // Define read/write syscalls!
 #define SYS_READ 0
 #define SYS_WRITE 1
+#define SYS_EXEC 3
 
 // Functions
 char getkey(uint8_t code); 

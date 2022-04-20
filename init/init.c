@@ -6,115 +6,39 @@
 #include <process.h>
 #include <string.h>
 
-extern int syscall(uint64_t nr, ...);
-//extern struct module_t; 
-
-// typedef struct modlist {
-//   char * name; 
-//   struct modlist * next;
-// } __attribute__((packed)) modlist_t;
-
-// // see if the command matches an available module name
-      // for (int i = 0; i < modnum; i++) {
-      //   int ret = strcmp(modname, modlist->name); 
-        
-      //   // match! return true so we can exec back in _start
-      //   if (ret == 0) {
-      //     return true; 
-      //   }
-
-      //   modlist = modlist->next; 
-      // }
-
-// bool askinput(char* modname, modlist_t* modlist, int modnum) {
-//   char* curchar = NULL; 
-//   int counter = 0; 
-
-//   // read in chars until we reach a newline
-//   while(counter < 20) {
-//     read(STDIN, curchar, 1); 
-
-//     // if user input is done
-//     if (*curchar == '\n') {
-
-//       if (strcmp(modname, "init")) { return true; }
-//       if (strcmp(modname, "echo")) { return true; }
-//       if (strcmp(modname, "sleep")) {return true; }
-
-
-//       // no dice, return false
-//       return false; 
-//     }
-
-//     // if input is not done, put it into modname
-//     strcat(modname, curchar, 1); 
-//   }
-
-//   // if you're here, input is invalid 
-//   return false; 
-
-// }
-
 void _start() {
 
   // Issue a write system call
-  write(STDOUT, "Init start!\n$ ");
-  
-  // // get a list of all the modules
-  // modlist_t* modlist = (modlist_t*)getmodules(); 
-  // int modnum = getmodnums(); 
+  write(STDOUT, "Init start!\n");
+  write(STDOUT, "$ "); 
 
-  char * modname = ""; 
+  char modname[5]; 
   bool valid = false; 
+  char curchar; 
 
-  do {
-    modname = "echo"; 
-    char curchar = '\n'; 
-    int counter = 0; 
+  do { 
 
-    // read in chars until we reach a newline
-    while(counter < 20) {
-      //read(STDIN, curchar, 1); 
-      //for(;;){}
+    // read in user command
+    read(STDIN, modname, 4);
 
-      // if user input is done
-      if (curchar == '\n') {
+    modname[5] = '\0';
+    //write(STDOUT, "  |  "); 
+    //write(STDOUT, modname); 
 
-        // check if input is valid
-        if (strcmp(modname, "init")) { valid = true; }
-        if (strcmp(modname, "echo")) { valid =  true; }
-        if (strcmp(modname, "sleep")) { valid = true; }
-      }
-
-      
-
-      // if input is not done, put it into modname
-      strcat(modname, &curchar, 1); 
-      //modname[counter] = curchar; 
-    }
+    // check if input is valid
+    if (strcmp(modname, "init") == 0) { valid = true; break; }
+    if (strcmp(modname, "echo") == 0) { valid =  true; break; }
+    if (strcmp(modname, "wait") == 0) { valid = true; break; }
 
     if (!valid) {
       write(STDOUT, "   Invalid command.\n$ ");
-      modname = ""; 
     }
 
   } while (!valid);
-
-
-  // // read in user input: 
-  // bool valid = askinput(modname); //, modlist, modnum); 
-
-  // if command is not valid, ask for a new input
-  // while(!valid) {
-  //   write(STDOUT, "   Invalid command.\n$");  
-  //   askinput(modname); //, modlist, modnum); 
-  // }
   
   // if inputs match module names, exec
   exec(modname); 
   
-  
-
   // Loop forever
   for(;;){}
 }

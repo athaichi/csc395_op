@@ -14,13 +14,13 @@ S_OBJ := $(patsubst %.s, $(OUT)/%.o, $(ASM))
 DEP := $(patsubst %.c, $(OUT)/%.d, $(SRC))
 
 .PHONY: all
-all: sleep
+all: wait
 
 .PHONY: clean
 clean:
-	rm -rf sleep $(OUT)
+	rm -rf wait $(OUT)
 
-sleep: $(C_OBJ) $(S_OBJ) linker.ld ../stdlib/libc.a
+wait: $(C_OBJ) $(S_OBJ) linker.ld ../stdlib/libc.a
 	$(LD) -T linker.ld -o $@ $(C_OBJ) $(S_OBJ) $(LDFLAGS)
 
 $(C_OBJ): $(OUT)/%.o: %.c

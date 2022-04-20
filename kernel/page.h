@@ -6,6 +6,7 @@ uintptr_t read_cr3();
 uintptr_t get_hhdm();
 void translate(void* address);
 void* ptov (uint64_t paddr); 
+void unmap_lower_half(uintptr_t root); 
 
 uintptr_t pmem_alloc(); 
 void pmem_free(uintptr_t p); 

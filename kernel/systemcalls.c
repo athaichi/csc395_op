@@ -4,6 +4,7 @@
 
 #include "systemcalls.h"
 #include "kprint.h"
+#include "executables.h"
 
 
 
@@ -104,7 +105,7 @@ int kread(uint64_t buf, uint64_t numchars) {
   for (int i = 0; i < numchars; i++) {
     char ret = kgetc(); 
     buff[i] = ret;
-    kprintf("%c", ret); 
+    //kprintf("%c", ret); 
   }
 
   // set up to return 
@@ -184,6 +185,8 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2
 
   // if we are writing, call the write function
   if (nr == SYS_WRITE) {int wlen = kwrite(arg1, arg2); return wlen; }
+
+  if (nr == SYS_EXEC) {exec_setup((char*)arg0); }
 
   // file descriptor is not allowed
   return -1;

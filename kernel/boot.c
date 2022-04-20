@@ -4,6 +4,7 @@
 
 #include <string.h>
 #include <memory.h>
+#include <process.h>
 
 #include "stivale2.h"
 #include "util.h"
@@ -261,14 +262,16 @@ void write_cr0(uint64_t value) {
 }
 
 // -------------------------------------------------
-// set a global hdr variable
+
+// set a global hdr variable 
 struct stivale2_struct* hdr; 
 
 void _start(struct stivale2_struct* ihdr) {
-  hdr = ihdr; 
   // -------------------------------------------
   // | SETUP |
   // ---------
+
+  hdr = ihdr; 
   // We've booted! Let's start processing tags passed to use from the bootloader
   init_init(hdr); 
   term_init();
@@ -286,56 +289,7 @@ void _start(struct stivale2_struct* ihdr) {
   // allow us to handle keyboard interrupts
   idt_set_handler(IRQ1_INTERRUPT, keyboard_interrupt, IDT_TYPE_TRAP);
 
-  // Print a greeting
-  //kprintf("Hello Kernel!\n"); //term_write("Hello Kernel!\n", 14);
-  //term_putchar('h'); 
-
-  //all_tests(); 
-
-//   // Pick an arbitrary location and size for the user-mode stack
-// uintptr_t user_stack = 0x70000000000;
-// size_t user_stack_size = 8 * PAGESIZE;
-
-// // Map the user-mode-stack
-// for(uintptr_t p = user_stack; p < user_stack + user_stack_size; p += 0x1000) {
-//   // Map a page that is user-accessible, writable, but not executable
-//   vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, p, true, true, false);
-// }
-
-// // And now jump to the entry point
-// usermode_entry(USER_DATA_SELECTOR | 0x3,            // User data selector with priv=3
-//                 user_stack + user_stack_size - 8,   // Stack starts at the high address minus 8 bytes
-//                 USER_CODE_SELECTOR | 0x3,           // User code selector with priv=3
-//                 header->entry);                     // Jump to the entry point specified in the ELF file
-
-
-  // test to see if we can get access pages in usermode
-  uintptr_t test_page = 0x400000000;
-  bool ret = vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, true, true, false);
-  if (ret) { exec_setup("init"); }
-  else { kprintf("failed to vm_map\n"); }
-  // uintptr_t test_page = 0x400000000;
-  // bool ret = vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, true, true, false);
-  // if (ret) { exec_setup(hdr); }
-  // else {kprintf("failed to vm_map\n"); }
-
-  // char* og = "hello!"; 
-  // char dup[7]; 
-  // kstrcpy(dup, og); 
-  // kprintf("copied string is: %s\n", dup); 
-  // int ret = kstrcmp(og, dup); 
-  // kprintf("strings should be the same: %d\n", ret);  
-  // char * add = "hello!"; 
-  // char * new = kstrcat(dup, add, 6); 
-  // kprintf("new str is: %s\n", new); 
-  // ret = kstrcmp(og, new); 
-  // kprintf("strs should not be the same: %d\n", ret); 
-
-  
-
-  // get modules
-  // kprint_s("Modules: \n"); 
-  // find_modules(hdr); 
+  exec("sleep");
 
 	// We're done, just hang...
 	halt();
