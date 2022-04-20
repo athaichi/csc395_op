@@ -5,3 +5,5 @@ kernel/obj
 **/.DS_Store
 init/obj
 stdlib/obj
+wait/obj
+echo/obj
