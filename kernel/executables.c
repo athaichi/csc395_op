@@ -84,6 +84,10 @@ extern struct stivale2_struct* hdr;
 
 
 void exec_setup(char* modulename) {
+
+    // unmap the lower half of the address space, using cr3 register as root address
+    // unmap_lower_half(read_cr3()); 
+
     // find a module - right now hardcoded to the first module
     struct stivale2_struct_tag_modules* moduleslist = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
     struct stivale2_module ourmod = moduleslist->modules[0]; 

@@ -4,6 +4,7 @@
 
 #include "systemcalls.h"
 #include "kprint.h"
+#include "page.h"
 
 
 
@@ -175,6 +176,54 @@ char kgetc() {
   return returned; 
 }
 
+// starting address for mapping space
+uintptr_t MAPSTART = 0x90000000000;
+
+//mmap from syscall side
+uintptr_t map(void *addr, size_t len, int prot, int flags, int fd, int offset) { 
+  uintptr_t startmap = 0; 
+
+  // get protection flags
+  bool writable = false, executable = false, usable = false; 
+  if((prot & PROT_EXEC) > 0) { executable = true; }
+  if((prot & PROT_WRITE) > 0) { writable = true; }
+  if((prot & PROT_NONE) > 0) {  }
+
+  // get map flags
+  bool shared = false, private = false, anonymous = false, fixed = false; 
+  if((flags & MAP_ANONYMOUS) > 0) { anonymous = true; }
+  if((flags & MAP_FIXED) > 0) { fixed = true; }
+  if((flags & MAP_PRIVATE) > 0) { private = true; }
+  if((flags & MAP_SHARED) > 0) { shared = true; }
+
+  // decide on a start address that is page aligned
+  if (fixed) {
+    startmap = (uintptr_t)addr; 
+  } else if (addr != NULL) {
+    int off = (uintptr_t)addr % PAGESIZE; 
+    startmap = (uintptr_t)addr - off; 
+  } else {
+    startmap = MAPSTART; 
+  }
+
+  // loop thorough and vm_map appropriate amount of space
+  for (int i = 0; i < len; i+=PAGESIZE) {
+    bool ret = vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, startmap, usable, writable, executable);
+    if(!ret) {
+      kprintf("MMAP has failed\n"); 
+
+      // reuse half mapped space
+      MAPSTART = MAPSTART - (PAGESIZE * i); 
+      return -1;  
+    }
+
+    // update MAPSTART position
+    MAPSTART += PAGESIZE; 
+  }
+
+  return startmap; 
+}
+
 // SYSCALL STUFF:
 int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
   //kprintf("syscall %d: %d, %d, %d, %d, %d, %d\n", nr, arg0, arg1, arg2, arg3, arg4, arg5);
@@ -184,6 +233,9 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2
 
   // if we are writing, call the write function
   if (nr == SYS_WRITE) {int wlen = kwrite(arg1, arg2); return wlen; }
+
+  // if we are mmaping, call map
+  if (nr == SYS_MAP) {uint64_t ret = (uint64_t)map((void*)arg0, arg1, arg2, arg3, arg4, arg5); return ret; }
 
   // file descriptor is not allowed
   return -1;
