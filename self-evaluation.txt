@@ -1,0 +1,48 @@
+This is the self-evaluation text file for the kernel project done by Lanea Rohan. 
+
+The categories are listed as they appear in the rubric. Next to each category 
+is a score that I have given myself, as well as an explanation or justification for
+the score given. Additional comments may be amended below each section if there 
+is more information that I think is key to understanding a particular rubric item. 
+
+1. Input/Output
+    Score: 3/3
+    Justification: 
+
+2. Exceptions: 
+    Score: 3/3
+    Justification: 
+
+3. Virtual Memory: 
+    Score: 3/3
+    Justification: 
+
+4. System Calls: 
+    Score: 1/3
+    Justification: 
+
+5. Loader: 
+    Score: 3/3
+    Justification: 
+
+6. Standard Library: 
+    Score: 2/3  -- printf is not implemented
+    Justification: 
+
+7. User Mode: 
+    Score: 3/3
+    Justification: 
+
+8. Processess: 
+    Score: 2/3
+    Justification: 
+
+9. Shell: 
+    Score: 1/3
+    Justificaton: 
+
+10. Code Quality: 
+    Score: 2/3
+    Justification: 
+
+Total Score: 23/30
