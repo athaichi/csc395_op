@@ -7,7 +7,7 @@ is more information that I think is key to understanding a particular rubric ite
 
 1. Input/Output
     Score: 3/3
-    Justification: 
+    Justification: I have used 
 
 2. Exceptions: 
     Score: 3/3
@@ -15,27 +15,44 @@ is more information that I think is key to understanding a particular rubric ite
 
 3. Virtual Memory: 
     Score: 3/3
-    Justification: 
+    Justification: I can run the init program in usermode, meaning that I can 
+        use vm_map and vm_protect to allocate memory to hold a new process. 
 
 4. System Calls: 
     Score: 1/3
-    Justification: 
+    Justification: I have both the read and write system calls working, because I 
+        because I can use them in the init program. I have no clue if mmap (via malloc)
+        works because I haven't tried testing it at all. 
 
 5. Loader: 
     Score: 3/3
-    Justification: 
+    Justification: I can run the init program in userrmode, meaning that I can load 
+        and execute init. 
 
 6. Standard Library: 
-    Score: 2/3  -- printf is not implemented
-    Justification: 
+    Score: 3/3 (unless we were required to implement printf, then 2/3)
+    Justification: Modules link to a standard library and can use functions given 
+        there. This can be seen by the ability to call read(), write(), exec(), exit()
+        from modules. I don't think I have any functions that are floating around the 
+        kernel which are completely usermode friendly. However, if we were required to 
+        implement printf (and not use it as a suggestion to functions we could choose
+        to implement) then I'll give myself a 2/3.
 
 7. User Mode: 
     Score: 3/3
-    Justification: 
+    Justification: I can reach usermode in the init program. If there is an access to a 
+        page marked as non-user accessible, then there is a page fault. 
+
+
+For the following, I'm not entirely sure what is happening, so these scores are extremely
+tentative. 
 
 8. Processess: 
     Score: 2/3
-    Justification: 
+    Justification: I can call exec using the name of a module from boot. However, it only
+        runs the init program, even though I have not hardcoded it to do so (at least I 
+        don't think I have). So, exec works - it unmaps the lower half, and loads a new 
+        executable. 
 
 9. Shell: 
     Score: 1/3
@@ -45,4 +62,4 @@ is more information that I think is key to understanding a particular rubric ite
     Score: 2/3
     Justification: 
 
-Total Score: 23/30
+Total Score: 24/30
