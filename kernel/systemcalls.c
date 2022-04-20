@@ -7,10 +7,10 @@
 #include "page.h"
 
 
-
-// create an array of keys following scan code from 
-//   https://wiki.osdev.org/PS2_Keyboard#Scan_Code_Set_1
-//   Everett Hayes sent me the keyboard layout code
+/** create an array of keys following scan code from 
+ *   https://wiki.osdev.org/PS2_Keyboard#Scan_Code_Set_1
+ *   Everett Hayes sent me the keyboard layout code
+ */
 char keys[128] =
 {
     0,  27, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b',   
@@ -52,6 +52,9 @@ volatile int8_t buffer_length = 0; // number of characters currently in the buff
 int8_t reading_index = 0; 
 int8_t writing_index = 0; 
 
+/**
+ * Handle when the backspace key is pressed
+ */
 void backspace() {
   buffer_length--; 
   reading_index--;
@@ -62,7 +65,12 @@ void backspace() {
   }
 }
 
-// take in a code and print corresponding key
+/**
+ * Take in a keyboard code and change it to be the correct character
+ *
+ * \param code key-down keyboard code
+ * \returns the corresponding ASCII character
+ */
 char getkey(uint8_t code) {
 
   // Handle fancy characters
@@ -95,8 +103,15 @@ char getkey(uint8_t code) {
   return keys[code]; 
 }
 
-// system call read() function 
-// fix this to handle backspace
+
+/**
+ * Kernel side implementation of syscall read. 
+ *    Does not handle backspace()
+ *
+ * \param buf       where to place read characters
+ * \param numchars  number of characters to read in
+ * \returns the number of bytes read
+ */
 int kread(uint64_t buf, uint64_t numchars) {
   // create a new buffer
   char* buff = (char*)buf;   
@@ -112,6 +127,14 @@ int kread(uint64_t buf, uint64_t numchars) {
   return numchars; 
 }
 
+/**
+ * Kernel side implementation of syscall write. 
+ *    Does not handle backspace()
+ *
+ * \param buf       where to read characters from 
+ * \param numchars  number of characters to write out
+ * \returns the number of bytes written
+ */
 int kwrite(uint64_t buf, uint64_t len) {
   // turn buffer into a string
   char* wbuffer = (char*)buf; 
@@ -125,6 +148,8 @@ int kwrite(uint64_t buf, uint64_t len) {
   return len; 
 }
 
+
+// Used to be used for kgetc() I think
 void char_write(char key) {
   if (key == '\0') {
     return; 
@@ -176,10 +201,23 @@ char kgetc() {
   return returned; 
 }
 
+// ==================================================================
+
 // starting address for mapping space
 uintptr_t MAPSTART = 0x90000000000;
 
-//mmap from syscall side
+/**
+ * Kernel side implementation of syscall mmap. 
+ *    If addr is NULL, mapped at my chosen address MAPSTART
+ *
+ * \param addr  address to map at
+ * \param len   size of space to map
+ * \param prot  memory protection flags: PROT_EXEC, PROT_WRITE, PROT_NONE, PROT_READ
+ * \param flags map sharing flags: MAP_ANONYMOUS, MAP_FIXED, MAP_PRIVATE, MAP_SHARED
+ * \param fd    file descriptor
+ * \param offset offset inside of file descriptor
+ * \returns a pointer to the mapped space
+ */
 uintptr_t map(void *addr, size_t len, int prot, int flags, int fd, int offset) { 
   uintptr_t startmap = 0; 
 
@@ -209,6 +247,8 @@ uintptr_t map(void *addr, size_t len, int prot, int flags, int fd, int offset) {
   // loop thorough and vm_map appropriate amount of space
   for (int i = 0; i < len; i+=PAGESIZE) {
     bool ret = vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, startmap, usable, writable, executable);
+    
+    // if vm_map fails for some reason
     if(!ret) {
       kprintf("MMAP has failed\n"); 
 
@@ -224,7 +264,13 @@ uintptr_t map(void *addr, size_t len, int prot, int flags, int fd, int offset) {
   return startmap; 
 }
 
-// SYSCALL STUFF:
+/**
+ * Sets system calls to correct handlers when triggered
+ *
+ * \param nr       which system call it is (READ/WRITE/etc)
+ * \param arg0-5  optional arguments passed in
+ * \returns varies based on system call 
+ */
 int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
   //kprintf("syscall %d: %d, %d, %d, %d, %d, %d\n", nr, arg0, arg1, arg2, arg3, arg4, arg5);
   

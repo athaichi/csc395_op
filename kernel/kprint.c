@@ -20,15 +20,30 @@ extern void term_putchar(char c);
 //   return len; 
 // }
 
+/**
+ * Print one character to the terminal
+ *
+ * \param char the character to print
+ */
 void kprint_c(char c) {
   term_putchar(c); 
 }
 
+/**
+ * Print a string to the terminal
+ *
+ * \param str the string to print
+ */
 void kprint_s(const char* str) {
   uint64_t len = strlen(str);
   for (int i = 0; i < len; i++) { term_putchar(*str); str++; }
 }
 
+/**
+ * Print one base 10 number to the terminal
+ *
+ * \param value the base 10 numbere to print
+ */
 void kprint_d(uint64_t value){
   if(value < 10) {
     kprint_c(value + 48);
@@ -56,6 +71,11 @@ void kprint_d(uint64_t value){
   }
 }
 
+/**
+ * Print hex character to the terminal
+ *
+ * \param value the character to print
+ */
 void kprint_x(uint64_t value) {
   if(value < 17) {
     if(value < 10) { kprint_c(value + 48); }
@@ -88,6 +108,11 @@ void kprint_x(uint64_t value) {
 
 }
 
+/**
+ * Print a pointer in hex to the terminal
+ *
+ * \param char the pointer to print
+ */
 void kprint_p(void* ptr) {
   kprint_c('0'); 
   kprint_c('x'); 
@@ -97,6 +122,12 @@ void kprint_p(void* ptr) {
 
 // This is taken directly from the class website after completing the implementation 
 //   together as a class 
+/**
+ * Print a formated string to the terminal
+ *
+ * \param format the format to print
+ *                note that additional arguments are generrally expected
+ */
 void kprintf(const char* format, ...) {
   // Start processing variadic arguments
   va_list args;

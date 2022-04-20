@@ -6,7 +6,13 @@
 #include "stivale2.h"
 #include "kprint.h"
 
-// Find a tag with a given ID
+/**
+ * Find a stivale2 tag with a given ID
+ * 
+ * \param hdr stivale2 hdr tag
+ * \param id  ID we are looking for
+ * \returns pointeer to the tag with the ID we are looking for
+ */
 void* find_tag(struct stivale2_struct* hdr, uint64_t id) {
   // Start at the first tag
 	struct stivale2_tag* current = (struct stivale2_tag*)hdr->tags;
@@ -26,6 +32,11 @@ void* find_tag(struct stivale2_struct* hdr, uint64_t id) {
 	return NULL;
 }
 
+/**
+ * Print all usable (accessible and marked usable by bootloader) memory
+ *
+ * \param hdr stivale2 hdr tag
+ */
 void usable_memory(struct stivale2_struct* hdr) {
   // print section label 
   kprint_s("Usable memory: \n"); 

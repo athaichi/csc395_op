@@ -44,19 +44,28 @@ is more information that I think is key to understanding a particular rubric ite
         page marked as non-user accessible, then there is a page fault. 
 
 
-For the following, I'm not entirely sure what is happening, so these scores are extremely
-tentative. 
+For the following two (processees and shell): I'm not entirely sure what is happening, so these scores are extremely
+tentative. Both are broken, but I'm not sure why either of them is broken. If it is only exec that has 
+broken the shell (but if exec was fixed then the shell would work, which is my suspicion), then I think the shell 
+is fine enough to be worth 3/3. However, it currently cannot do that, which is why it has been given a 1/3. 
 
 8. Processess: 
     Score: 2/3
     Justification: I can call exec using the name of a module from boot. However, it only
         runs the init program, even though I have not hardcoded it to do so (at least I 
         don't think I have). So, exec works - it unmaps the lower half, and loads a new 
-        executable. 
+        executable. However, the executable is always init, and it doesn't like getting called 
+        from init to do something. If I were to guess where the problem is, I'd say its coming from when I ask to 
+        execute a new program, there is an interrupt when setting up the new gdt and thus it just freezes. 
+        However, it does not crash, although it is somewhat lacking functionality, putting it into the 2/3 
+        category. 
 
 9. Shell: 
     Score: 1/3
-    Justificaton: 
+    Justificaton: It kind of behaves like a shell. For some reason it duplicates whatever you 
+        type into the terminal, however other than the fact that exec() doesn't do what it's supposed to,
+        it maybe works okay. If you type in a valid command, it will just stop (thanks exec()). If you type 
+        in an invalid command, it will tell you it is invalid and prompt you for another command. 
 
 10. Code Quality: 
     Score: 2/3

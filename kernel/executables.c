@@ -82,11 +82,14 @@ extern void usermode_entry(uint64_t data_sel, uintptr_t stack_ptr, uint64_t code
 // hdr from boot.c _start
 extern struct stivale2_struct* hdr; 
 
-
+/**
+ * Do the brunt work of exec
+ * \param modulename: the id string associated with module to load
+ */
 void exec_setup(char* modulename) {
 
     // unmap the lower half of the address space, using cr3 register as root address
-    // unmap_lower_half(read_cr3()); 
+    unmap_lower_half(read_cr3()); 
 
     // find a module - right now hardcoded to the first module
     struct stivale2_struct_tag_modules* moduleslist = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
@@ -148,26 +151,3 @@ void exec_setup(char* modulename) {
                     header->e_entry);                     // Jump to the entry point specified in the ELF file
 
 }
-
-// void find_modules(struct stivale2_struct* hdr) {
-//   struct stivale2_struct_tag_modules* modules = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
-
-//   for(uint64_t current = 0; current < modules->module_count; current++) {
-//     struct stivale2_module cur = modules->modules[current]; 
-    
-//     //print all the modules
-//     //print name
-//     for (int i = 0; i<128; i++) {
-//       //char n = cur.string[i]; 
-//       //kprint_c(n); 
-//       //if (n == '\0') { break; }
-//     }
-//     kprint_s("    0x");
-//     kprint_x(cur.begin); 
-//     kprint_s(" - 0x"); 
-//     kprint_x(cur.end); 
-
-//     // format for next entry 
-//     kprint_c('\n');
-//   }
-// }

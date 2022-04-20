@@ -191,6 +191,21 @@
   // k_memcpy(copy, test, 5); 
   // kprintf("%s", copy); 
 
+
+  // char* og = "hello!"; 
+  // char dup[7]; 
+  // kstrcpy(dup, og); 
+  // kprintf("copied string is: %s\n", dup); 
+  // int ret = kstrcmp(og, dup); 
+  // kprintf("strings should be the same: %d\n", ret);  
+  // char * add = "hello!"; 
+  // char * new = kstrcat(dup, add, 6); 
+  // kprintf("new str is: %s\n", new); 
+  // ret = kstrcmp(og, new); 
+  // kprintf("strs should not be the same: %d\n", ret); 
+
+  
+
   //test exec_setup()
   //exec_setup(hdr);
 

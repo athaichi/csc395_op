@@ -6,9 +6,6 @@
 
 #include "gdt.h"
 
-
-//#include <string.h>
-
 #define MAX_GDT_SIZE 256
 
 // Reserve space for a GDT that we'll fill in below

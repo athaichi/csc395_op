@@ -1,9 +1,12 @@
 #include <stdint.h>
 
-// strtok/strtok_r
-
-
-// credit: https://stackoverflow.com/questions/3213827/how-to-iterate-over-a-string-in-c 
+/**
+ * Get the length of a string
+ *      Credit to: https://stackoverflow.com/questions/3213827/how-to-iterate-over-a-string-in-c 
+ *
+ * \param str the string we are calculating on
+ * \returns the length of the string
+ */
 uint64_t strlen(const char* str) {
   uint64_t len = 0;
   while(*str) { //if we haven't finished iterating over the string, 
@@ -13,6 +16,14 @@ uint64_t strlen(const char* str) {
   return len; 
 }
 
+/**
+ * Concatanate two strings together
+ * 
+ * \param dest the string we are concatanating to
+ * \param src  the string that appears first in the concatanation
+ * \param len  length of the string we are adding on 
+ * \returns a pointer to the concatanated string
+ */
 char* strcat(char* dest, const char* src, int len) {
   int oglen = strlen(dest); //ignore the null terminator 
   char buf[oglen+len+1]; // +1 for null terminator 
@@ -36,6 +47,13 @@ char* strcat(char* dest, const char* src, int len) {
   return returned; 
 }
 
+/**
+ * Copy the value of a string
+ * 
+ * \param dest the pointer we are copying to 
+ * \param src  the string we are copying
+ * \returns a pointer to the copied string
+ */
 char* strcpy (char* dest, char* src) {
   int len = strlen(src); 
 
@@ -47,6 +65,13 @@ char* strcpy (char* dest, char* src) {
   return dest; 
 }
 
+/**
+ * Alphanumerically compare two strings
+ * 
+ * \param s1 the string we are concatanating to
+ * \param s2  the string that appears first in the concatanation
+ * \returns 0 if same, >0 if s1>s2 and <0 if s1<s2
+ */
 int strcmp(const char *s1, const char *s2) {
   int len1 = strlen(s1); 
   int len2 = strlen(s2); 

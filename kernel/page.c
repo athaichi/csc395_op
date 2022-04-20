@@ -7,8 +7,8 @@
 
 #include "kprint.h"
 #include "mem.h"
-// note to self: bottom bits are on the right
 
+// note to self: bottom bits are on the right
 
 // create a page entry
 // should be 64 bits
@@ -38,7 +38,13 @@ void write_cr3(uint64_t value) {
   __asm__("mov %0, %%cr3" : : "r" (value));
 }
 
-// create a helper to get physical to virtual 
+/**
+ * Get HHDM base, used to translate between virtual and physical 
+ *    memory addresses
+ *
+ * \param hdr stivale2 header tag
+ * \returns   the address of the HHDM tag
+ */ 
 uintptr_t get_hhdm(struct stivale2_struct* hdr) {
   struct stivale2_struct_tag_hhdm* hhdm = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
   return (uintptr_t)hhdm->addr; 
@@ -103,9 +109,6 @@ void translate(void* address, struct stivale2_struct* hdr) {
   }
 
   // get final offset 
-  //if ()
-
-  // get final offset 
   uintptr_t result = table_phys + indices[0]; 
 
   // print final offset address 
@@ -113,8 +116,6 @@ void translate(void* address, struct stivale2_struct* hdr) {
 
   return; 
 }
-
-
 
 // ===============================================
 // ===============================================
@@ -125,6 +126,12 @@ void translate(void* address, struct stivale2_struct* hdr) {
 // global! gets set in init_init (in boot)
 extern uintptr_t hhdm_base; 
 
+/**
+ * Translate from physical memory address to virtual memory address
+ *
+ * \param paddr physical memory address
+ * \returns a pointer to the corresponding virtual address
+ */
 void* ptov (uint64_t paddr) {
   uintptr_t vaddr = (uintptr_t)(paddr + hhdm_base); 
   return (void*)vaddr; 
@@ -133,7 +140,7 @@ void* ptov (uint64_t paddr) {
 // global! keep track of number of free pages - just for testing purposes
 int free_page_counter = 0;
 
-// do this via a linked list
+// keep track of free pages using a linked list
 typedef struct pmem_freeentry {
   struct pmem_freeentry * next;
 } __attribute__((packed)) pmem_freeentry_t;  
@@ -193,7 +200,12 @@ void pmem_free(uintptr_t p) {
 
 }
 
-// Unmap everything in the lower half of an address space with level 4 page table at address root
+/**
+ * Unmap everything in the lower half of an address space with 
+ *      level 4 page table at address root
+ *
+ * \param root physical address at top level of page table
+ */
 void unmap_lower_half(uintptr_t root) {
   // We can reclaim memory used to hold page tables, but NOT the mapped pages
   pt_entry_t* l4_table = ptov(root);
@@ -239,11 +251,13 @@ void unmap_lower_half(uintptr_t root) {
 }
 
 
-// this does a whole bunch of useful init stuff: 
-/*
-- sets up global hhdm base
-- puts stuff in the freelist
-*/
+/**
+ * Do misc setup, including 
+ *     - sets up global hhdm base
+ *     - puts stuff in the freelist
+ * 
+ * \param hdr stivale2 header tag
+ */
 void mem_init(struct stivale2_struct* hdr) {
   // set global
   hhdm_base = (uintptr_t)(get_hhdm(hdr));

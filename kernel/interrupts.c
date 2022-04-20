@@ -201,39 +201,35 @@ void idt_setup() {
 
   // -----------------------------------------------
 
-  // Step 2: Use idt_set_handler() to set handlers for the standard exceptions (1--21)
-  // TRAPS, and FAULTS can be continued if fixed, 
-  // ABORTS cannot be continued
-  uint8_t indices[21] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21}; 
-  
-  // Set each individual handler
+  // Use idt_set_handler() to set handlers for the standard exceptions (1--21)
+  // TRAPS, and FAULTS can be continued if fixed, ABORTS cannot be continued
   // for now, interrupts use TYPE_INTERRUPT, and everything else is a TYPE_TRAP
-  idt_set_handler(indices[0], handler0, IDT_TYPE_TRAP);       // fault/trap
-  idt_set_handler(indices[1], handler1, IDT_TYPE_INTERRUPT);  // interrupt
-  idt_set_handler(indices[2], handler2, IDT_TYPE_TRAP);       // trap
-  idt_set_handler(indices[3], handler3, IDT_TYPE_TRAP);       // trap
-  idt_set_handler(indices[4], handler4, IDT_TYPE_TRAP);       // fault
-  idt_set_handler(indices[5], handler5, IDT_TYPE_TRAP);       // fault
-  idt_set_handler(indices[6], handler6, IDT_TYPE_TRAP);       // fault
-  idt_set_handler(indices[7], handler7, IDT_TYPE_TRAP);       // abort
-  idt_set_handler(indices[8], handler8, IDT_TYPE_TRAP);       // fault
-  idt_set_handler(indices[9], handler9, IDT_TYPE_TRAP);       // fault
-  idt_set_handler(indices[10], handler10, IDT_TYPE_TRAP);      // fault
-  idt_set_handler(indices[11], handler11, IDT_TYPE_TRAP);      // fault
-  idt_set_handler(indices[12], handler12, IDT_TYPE_TRAP);      // fault
-  idt_set_handler(indices[13], handler13, IDT_TYPE_TRAP);      // fault 
-  idt_set_handler(indices[14], handler14, IDT_TYPE_TRAP);      // fault 
-  idt_set_handler(indices[15], handler15, IDT_TYPE_TRAP);      // fault 
-  idt_set_handler(indices[16], handler16, IDT_TYPE_TRAP);      // fault 
-  idt_set_handler(indices[17], handler17, IDT_TYPE_TRAP);      // abort 
-  idt_set_handler(indices[18], handler18, IDT_TYPE_TRAP);      // fault 
-  idt_set_handler(indices[19], handler19, IDT_TYPE_TRAP);      // fault 
-  idt_set_handler(indices[20], handler20, IDT_TYPE_TRAP);      // fault 
+  idt_set_handler(1, handler0, IDT_TYPE_TRAP);       // fault/trap
+  idt_set_handler(2, handler1, IDT_TYPE_INTERRUPT);  // interrupt
+  idt_set_handler(3, handler2, IDT_TYPE_TRAP);       // trap
+  idt_set_handler(4, handler3, IDT_TYPE_TRAP);       // trap
+  idt_set_handler(5, handler4, IDT_TYPE_TRAP);       // fault
+  idt_set_handler(6, handler5, IDT_TYPE_TRAP);       // fault
+  idt_set_handler(7, handler6, IDT_TYPE_TRAP);       // fault
+  idt_set_handler(8, handler7, IDT_TYPE_TRAP);       // abort
+  idt_set_handler(9, handler8, IDT_TYPE_TRAP);       // fault
+  idt_set_handler(10, handler9, IDT_TYPE_TRAP);       // fault
+  idt_set_handler(11, handler10, IDT_TYPE_TRAP);      // fault
+  idt_set_handler(12, handler11, IDT_TYPE_TRAP);      // fault
+  idt_set_handler(13, handler12, IDT_TYPE_TRAP);      // fault
+  idt_set_handler(14, handler13, IDT_TYPE_TRAP);      // fault 
+  idt_set_handler(15, handler14, IDT_TYPE_TRAP);      // fault 
+  idt_set_handler(16, handler15, IDT_TYPE_TRAP);      // fault 
+  idt_set_handler(17, handler16, IDT_TYPE_TRAP);      // fault 
+  idt_set_handler(18, handler17, IDT_TYPE_TRAP);      // abort 
+  idt_set_handler(19, handler18, IDT_TYPE_TRAP);      // fault 
+  idt_set_handler(20, handler19, IDT_TYPE_TRAP);      // fault 
+  idt_set_handler(21, handler20, IDT_TYPE_TRAP);      // fault 
  
   
   // -------------------------------------------------
   
-  // Step 3: Install the IDT
+  // Install the IDT
   idt_record_t record = {
     .size = sizeof(idt),
     .base = idt
