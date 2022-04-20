@@ -86,37 +86,37 @@ typedef struct elf_phdr {
 // hdr from boot.c _start
 extern struct stivale2_struct* hdr;
 
-// set up pointer to the front of the list
-modname_t * modnamelist = NULL; 
+// // set up pointer to the front of the list
+// modname_t * modnamelist = NULL; 
 
-void * modnames () {
-    // find the list of modules
-    struct stivale2_struct_tag_modules* moduleslist = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
-    int modnum = moduleslist->module_count;
+// void * modnames () {
+//     // find the list of modules
+//     struct stivale2_struct_tag_modules* moduleslist = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
+//     int modnum = moduleslist->module_count;
 
-    // set up a curmod
-    struct stivale2_module curmod; 
+//     // set up a curmod
+//     struct stivale2_module curmod; 
 
-    // go through and add a new list entry per mod
-    for (int i = 0; i < modnum; i++) {
-        curmod = moduleslist->modules[i]; 
-        modname_t * new = NULL; 
-        new->name = curmod.string; 
+//     // go through and add a new list entry per mod
+//     for (int i = 0; i < modnum; i++) {
+//         curmod = moduleslist->modules[i]; 
+//         modname_t * new = NULL; 
+//         new->name = curmod.string; 
 
-        // update head of linked list
-        new->next = modnamelist; 
-        modnamelist = new;  
-    } 
+//         // update head of linked list
+//         new->next = modnamelist; 
+//         modnamelist = new;  
+//     } 
 
-    return (void*)modnamelist; 
-}
+//     return (void*)modnamelist; 
+// }
 
-int modnum() {
-    // get list of modules
-    struct stivale2_struct_tag_modules* moduleslist = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
-    int modnum = moduleslist->module_count;
-    return modnum; 
-}
+// int modnum() {
+//     // get list of modules
+//     struct stivale2_struct_tag_modules* moduleslist = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
+//     int modnum = moduleslist->module_count;
+//     return modnum; 
+// }
 
 void exec_setup(char* modulename) {
     // find correct module
